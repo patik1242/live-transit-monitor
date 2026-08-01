@@ -26,7 +26,7 @@
       "displayName": "top10_delay_routes_now",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    routeShortName,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nGROUP BY routeShortName\r\nORDER BY avg_delay_min DESC\r\nLIMIT 10",
+        "source": "SELECT\n    routeShortName,\n    transportationType,\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\n    COUNT(DISTINCT vehicleId) AS active_vehicles\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\nGROUP BY routeShortName, transportationType\nORDER BY avg_delay_min DESC\nLIMIT 10",
         "dimensions": [
           {
             "expr": "source.*"
@@ -36,7 +36,6 @@
           {
             "name": "count",
             "expr": "COUNT(*)",
-            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
             "displayName": "Count"
           }
         ]
@@ -47,7 +46,7 @@
       "displayName": "top10_now_slowest_routes",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    routeShortName,\r\n    ROUND(AVG(speed), 2) AS avg_speed,\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nWHERE is_moving = true\r\nGROUP BY routeShortName\r\nORDER BY avg_speed ASC\r\nLIMIT 10",
+        "source": "SELECT\n    routeShortName,\n    transportationType,\n    ROUND(AVG(speed), 2) AS avg_speed,\n    COUNT(DISTINCT vehicleId) AS active_vehicles\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\nWHERE is_moving = true\nGROUP BY routeShortName, transportationType\nORDER BY avg_speed ASC\nLIMIT 10",
         "dimensions": [
           {
             "expr": "source.*"
@@ -57,7 +56,6 @@
           {
             "name": "count",
             "expr": "COUNT(*)",
-            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
             "displayName": "Count"
           }
         ]
@@ -131,7 +129,7 @@
       "displayName": "most_delayed",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    delay_min AS max_delay_min,\r\n    routeShortName\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nWHERE delay_min IS NOT NULL\r\nORDER BY delay_min DESC\r\nLIMIT 1",
+        "source": "SELECT\r\n    delay_min AS max_delay_min,\r\n    routeShortName,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nWHERE delay_min IS NOT NULL\r\nORDER BY delay_min DESC\r\nLIMIT 1",
         "dimensions": [
           {
             "expr": "source.*"
@@ -141,7 +139,6 @@
           {
             "name": "count",
             "expr": "COUNT(*)",
-            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
             "displayName": "Count"
           }
         ]
@@ -152,7 +149,7 @@
       "displayName": "top10_delayed_vehicles",
       "config": {
         "version": "1.1",
-        "source": "SELECT vehicleCode, routeShortName, headsign, delay_min, speed, event_time\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nWHERE delay_min IS NOT NULL\r\nORDER BY delay_min DESC\r\nLIMIT 10",
+        "source": "SELECT vehicleCode, routeShortName, headsign, delay_min, speed, event_time, transportationType\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\nWHERE delay_min IS NOT NULL\nORDER BY delay_min DESC\nLIMIT 10",
         "dimensions": [
           {
             "expr": "source.*"
@@ -162,7 +159,6 @@
           {
             "name": "count",
             "expr": "COUNT(*)",
-            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
             "displayName": "Count"
           }
         ]
@@ -186,7 +182,7 @@
           "position": {
             "x": 0,
             "y": 0,
-            "width": 12,
+            "width": 9,
             "height": 2
           }
         },
@@ -715,9 +711,88 @@
             "width": 12,
             "height": 6
           }
+        },
+        {
+          "widget": {
+            "name": "02ba0726",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "32f12051",
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {}
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
         }
       ],
       "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "aa9a0b44",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "33d03a60",
+            "queries": [
+              {
+                "name": "dashboards/01f18dc8029c1ec3ae6520b143704c8f/datasets/01f18dc8029f1db6a7930a1d1d9fbb86_transportationType",
+                "query": {
+                  "datasetName": "b0e12cb1",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Transportation Type",
+                "showTitle": true
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dc8029c1ec3ae6520b143704c8f/datasets/01f18dc8029f1db6a7930a1d1d9fbb86_transportationType"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
       "layoutVersion": "GRID_V1"
     }
   ],
