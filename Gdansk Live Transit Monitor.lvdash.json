@@ -5,7 +5,7 @@
       "displayName": "gold_delay_distribution",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    delay_bucket,\r\n    transportationType,\r\n    SUM(records_count) AS records_count,\r\n    SUM(vehicles_count) AS vehicles_count\r\nFROM dbr_dev.live_transit_monitor.gold_delay_distribution\r\nGROUP BY delay_bucket, transportationType",
+        "source": "SELECT\r\n    delay_bucket,\r\n    transportationType,\r\n    SUM(records_count) AS records_count,\r\n    SUM(vehicles_count) AS vehicles_count\r\nFROM dbr_dev.live_transit_monitor.gold_delay_distribution\r\nGROUP BY delay_bucket, transportationType\r\nHAVING transportationType IS NOT NULL",
         "dimensions": [
           {
             "expr": "source.*"
@@ -26,7 +26,7 @@
       "displayName": "top10_delay_routes_now",
       "config": {
         "version": "1.1",
-        "source": "SELECT routeShortName, transportationType, avg_delay_min, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(delay_min) DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    GROUP BY routeShortName, transportationType\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_delay_min DESC",
+        "source": "SELECT routeShortName, transportationType, avg_delay_min, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(delay_min) DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    GROUP BY routeShortName, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_delay_min DESC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -46,7 +46,7 @@
       "displayName": "top10_now_slowest_routes",
       "config": {
         "version": "1.1",
-        "source": "SELECT routeShortName, transportationType, avg_speed, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(speed), 2) AS avg_speed,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(speed) ASC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    WHERE is_moving = true\r\n    GROUP BY routeShortName, transportationType\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_speed ASC",
+        "source": "SELECT routeShortName, transportationType, avg_speed, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(speed), 2) AS avg_speed,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(speed) ASC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    WHERE is_moving = true\r\n    GROUP BY routeShortName, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_speed ASC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -66,7 +66,7 @@
       "displayName": "gold_live_kpi",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n    COUNT(DISTINCT CASE WHEN is_moving = false THEN vehicleId END) AS stopped_vehicles,\r\n    COUNT(DISTINCT CASE WHEN delay > 120 THEN vehicleId END) AS delayed_vehicles,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nGROUP BY transportationType",
+        "source": "SELECT\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n    COUNT(DISTINCT CASE WHEN is_moving = false THEN vehicleId END) AS stopped_vehicles,\r\n    COUNT(DISTINCT CASE WHEN delay > 120 THEN vehicleId END) AS delayed_vehicles,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nGROUP BY transportationType\r\nHAVING transportationType IS NOT NULL",
         "dimensions": [
           {
             "expr": "source.*"
@@ -87,7 +87,7 @@
       "displayName": "top10headsigns",
       "config": {
         "version": "1.1",
-        "source": "SELECT headsign, active_vehicles, transportationType\r\nFROM (\r\n    SELECT\r\n        headsign,\r\n        transportationType,\r\n        SUM(active_vehicles) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY SUM(active_vehicles) DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_destination_summary\r\n    GROUP BY headsign, transportationType\r\n)\r\nWHERE rn <= 10\r\nORDER BY active_vehicles DESC",
+        "source": "SELECT headsign, active_vehicles, transportationType\r\nFROM (\r\n    SELECT\r\n        headsign,\r\n        transportationType,\r\n        SUM(active_vehicles) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY SUM(active_vehicles) DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_destination_summary\r\n    GROUP BY headsign, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY active_vehicles DESC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -108,7 +108,7 @@
       "displayName": "top10_delayed_routes",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    routeShortName,\r\n    transportationType,\r\n    active_vehicles,\r\n    delayed_vehicles,\r\n    ROUND(delayed_vehicles * 100.0 / active_vehicles, 1) AS pct_delayed,\r\n    avg_delay_min,\r\n    max_delay_min,\r\n    ROUND((delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min, 1) AS problem_score\r\nFROM dbr_dev.live_transit_monitor.gold_route_summary\r\nWHERE active_vehicles >= 5\r\nQUALIFY ROW_NUMBER() OVER (\r\n    PARTITION BY transportationType\r\n    ORDER BY (delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min DESC\r\n) <= 10\r\nORDER BY problem_score DESC",
+        "source": "SELECT\r\n    routeShortName,\r\n    transportationType,\r\n    active_vehicles,\r\n    delayed_vehicles,\r\n    ROUND(delayed_vehicles * 100.0 / active_vehicles, 1) AS pct_delayed,\r\n    avg_delay_min,\r\n    max_delay_min,\r\n    ROUND((delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min, 1) AS problem_score\r\nFROM dbr_dev.live_transit_monitor.gold_route_summary\r\nWHERE active_vehicles >= 5 AND transportationType is not null\r\nQUALIFY ROW_NUMBER() OVER (\r\n    PARTITION BY transportationType\r\n    ORDER BY (delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min DESC\r\n) <= 10\r\nORDER BY problem_score DESC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -129,7 +129,7 @@
       "displayName": "most_delayed",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    MAX(delay_min) AS max_delay_min,\r\n    CONCAT(MAX_BY(routeShortName, delay_min), ' (', transportationType, ')') AS route_info,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nWHERE delay_min IS NOT NULL\r\nGROUP BY transportationType",
+        "source": "SELECT\r\n    MAX(delay_min) AS max_delay_min,\r\n    CONCAT(MAX_BY(routeShortName, delay_min), ' (', transportationType, ')') AS route_info,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nWHERE delay_min IS NOT NULL\r\nGROUP BY transportationType\r\nHAVING transportationType IS NOT NULL",
         "dimensions": [
           {
             "expr": "source.*"
@@ -149,7 +149,7 @@
       "displayName": "top10_delayed_vehicles",
       "config": {
         "version": "1.1",
-        "source": "SELECT vehicleCode, routeShortName, headsign, delay_min, speed, event_time, transportationType\r\nFROM (\r\n    SELECT\r\n        vehicleCode,\r\n        routeShortName,\r\n        headsign,\r\n        delay_min,\r\n        speed,\r\n        event_time,\r\n        transportationType,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY delay_min DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    WHERE delay_min IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY delay_min DESC",
+        "source": "SELECT vehicleCode, routeShortName, headsign, delay_min, speed, event_time, transportationType\r\nFROM (\r\n    SELECT\r\n        vehicleCode,\r\n        routeShortName,\r\n        headsign,\r\n        delay_min,\r\n        speed,\r\n        event_time,\r\n        transportationType,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY delay_min DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    WHERE delay_min IS NOT NULL AND transportationType is not null\r\n)\r\nWHERE rn <= 10\r\nORDER BY delay_min DESC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -169,7 +169,28 @@
       "displayName": "trend",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    DATE_TRUNC('hour', event_time) AS hour_bucket,\r\n    transportationType,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles\r\nFROM dbr_dev.live_transit_monitor.gps_positions_silver\r\nWHERE has_trip = true\r\nGROUP BY DATE_TRUNC('hour', event_time), transportationType\r\nORDER BY hour_bucket",
+        "source": "SELECT\r\n    DATE_TRUNC('hour', event_time) AS hour_bucket,\r\n    transportationType,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles\r\nFROM dbr_dev.live_transit_monitor.gps_positions_silver\r\nWHERE has_trip = true\r\nGROUP BY DATE_TRUNC('hour', event_time), transportationType\r\nHAVING transportationType IS NOT NULL\r\nORDER BY hour_bucket",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "8a1e00e8",
+      "displayName": "current_time",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT\r\n    CAST(CURRENT_TIMESTAMP() AS DATE) AS today",
         "dimensions": [
           {
             "expr": "source.*"
@@ -189,14 +210,14 @@
   "pages": [
     {
       "name": "143ffaaa",
-      "displayName": "Untitled page",
+      "displayName": "Gdansk Live Transit Monitor",
       "layout": [
         {
           "widget": {
             "name": "5877fd89",
             "multilineTextboxSpec": {
               "lines": [
-                "<span style=\"font-size: 36px;line-height: 1.5;\">**Gdańsk Live Transit Monitor**</span>"
+                "<span style=\"font-size: 36px;line-height: 1.5;color: #077A9D;\">**Gdańsk Live Transit Monitor**</span>"
               ]
             }
           },
@@ -234,7 +255,13 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(active_vehicles)"
+                  "fieldName": "sum(active_vehicles)",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 1
+                    }
+                  }
                 }
               },
               "data": {
@@ -276,7 +303,13 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "avg_delay_min"
+                  "fieldName": "avg_delay_min",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 2
+                    }
+                  }
                 }
               },
               "data": {
@@ -322,10 +355,21 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "max_delay_min"
+                  "fieldName": "max_delay_min",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 1
+                    }
+                  }
                 },
                 "target": {
-                  "fieldName": "route_info"
+                  "fieldName": "route_info",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "selectionColor"
+                    }
+                  }
                 }
               },
               "data": {
@@ -367,7 +411,13 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(stopped_vehicles)"
+                  "fieldName": "sum(stopped_vehicles)",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 2
+                    }
+                  }
                 }
               },
               "data": {
@@ -392,12 +442,12 @@
                   "datasetName": "b1996200",
                   "fields": [
                     {
-                      "name": "transportationType",
-                      "expression": "`transportationType`"
-                    },
-                    {
                       "name": "avg_delay_min",
                       "expression": "`avg_delay_min`"
+                    },
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
                     },
                     {
                       "name": "routeShortName",
@@ -410,24 +460,46 @@
             ],
             "spec": {
               "version": 3,
+              "style": {
+                "fontColor": {
+                  "light": "#0170CC"
+                }
+              },
               "frame": {
                 "showTitle": true,
-                "title": "Top 10 delayed routes now\n\n"
+                "title": "Current Most Delayed Routes\n",
+                "showDescription": true,
+                "description": "Ranks the routes with the highest average delay at the current moment."
               },
               "widgetType": "bar",
               "encodings": {
                 "x": {
                   "fieldName": "avg_delay_min",
+                  "displayName": "Average Delay (min)",
                   "scale": {
-                    "type": "quantitative"
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 0
+                    }
                   }
                 },
                 "y": {
                   "fieldName": "routeShortName",
+                  "displayName": "Route",
                   "scale": {
                     "type": "categorical",
                     "sort": {
                       "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "avg_delay_min",
+                  "displayName": "Avg Delay",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 0
                     }
                   }
                 },
@@ -459,16 +531,16 @@
                   "datasetName": "1fdf26b1",
                   "fields": [
                     {
+                      "name": "avg_speed",
+                      "expression": "`avg_speed`"
+                    },
+                    {
                       "name": "transportationType",
                       "expression": "`transportationType`"
                     },
                     {
                       "name": "routeShortName",
                       "expression": "`routeShortName`"
-                    },
-                    {
-                      "name": "avg_speed",
-                      "expression": "`avg_speed`"
                     }
                   ],
                   "disaggregated": true
@@ -479,12 +551,15 @@
               "version": 3,
               "frame": {
                 "showTitle": true,
-                "title": "Top 10 slowest routes now\n\n"
+                "title": "Current Slowest Routes\n",
+                "showDescription": true,
+                "description": "Shows the routes with the lowest average vehicle speed."
               },
               "widgetType": "bar",
               "encodings": {
                 "x": {
                   "fieldName": "routeShortName",
+                  "displayName": "Route",
                   "scale": {
                     "type": "categorical",
                     "sort": {
@@ -494,8 +569,23 @@
                 },
                 "y": {
                   "fieldName": "avg_speed",
+                  "displayName": "Average Speed ",
                   "scale": {
                     "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "avg_speed",
+                  "displayName": "Avg Speed",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "single-hue",
+                      "baseColor": {
+                        "themeColorType": "visualizationColors",
+                        "position": 2
+                      }
+                    }
                   }
                 },
                 "extra": [
@@ -540,18 +630,48 @@
             ],
             "spec": {
               "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Delay Status Distribution",
+                "showDescription": true,
+                "description": "Shows the distribution of vehicles by delay status (On Time, Delayed, Early)."
+              },
               "widgetType": "pie",
               "encodings": {
                 "angle": {
                   "fieldName": "sum(records_count)",
                   "scale": {
                     "type": "quantitative"
-                  }
+                  },
+                  "displayName": "Vehicles"
                 },
                 "color": {
                   "fieldName": "delay_bucket",
                   "scale": {
-                    "type": "categorical"
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "early",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 2
+                        }
+                      },
+                      {
+                        "value": "delayed",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "on_time",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 3
+                        }
+                      }
+                    ]
                   }
                 },
                 "label": {
@@ -580,12 +700,12 @@
                   "datasetName": "9dec4948",
                   "fields": [
                     {
-                      "name": "transportationType",
-                      "expression": "`transportationType`"
-                    },
-                    {
                       "name": "active_vehicles",
                       "expression": "`active_vehicles`"
+                    },
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
                     },
                     {
                       "name": "headsign",
@@ -598,16 +718,24 @@
             ],
             "spec": {
               "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Most Active Destinations",
+                "showDescription": true,
+                "description": "Displays the destinations currently served by the highest number of active vehicles."
+              },
               "widgetType": "bar",
               "encodings": {
                 "x": {
                   "fieldName": "active_vehicles",
+                  "displayName": "Active Vehicles",
                   "scale": {
                     "type": "quantitative"
                   }
                 },
                 "y": {
                   "fieldName": "headsign",
+                  "displayName": "Destination",
                   "scale": {
                     "type": "categorical",
                     "sort": {
@@ -615,9 +743,24 @@
                     }
                   }
                 },
+                "color": {
+                  "fieldName": "active_vehicles",
+                  "displayName": "active vehicles",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "single-hue",
+                      "baseColor": {
+                        "themeColorType": "visualizationColors",
+                        "position": 3
+                      }
+                    }
+                  }
+                },
                 "extra": [
                   {
-                    "fieldName": "transportationType"
+                    "fieldName": "transportationType",
+                    "displayName": "Transport Type"
                   }
                 ]
               },
@@ -667,7 +810,13 @@
                       "expression": "`transportationType`"
                     }
                   ],
-                  "disaggregated": true
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "`delay_min`"
+                    }
+                  ]
                 }
               }
             ],
@@ -675,28 +824,44 @@
               "version": 2,
               "frame": {
                 "showTitle": true,
-                "title": "Top 10 problematic "
+                "title": "Most Delayed Vehicles",
+                "showDescription": true,
+                "description": "List the currently most delayed vehicles with key operational information for quick mentoring. "
               },
               "widgetType": "table",
               "encodings": {
                 "columns": [
                   {
-                    "fieldName": "vehicleCode"
+                    "fieldName": "vehicleCode",
+                    "displayName": "Vehicle"
                   },
                   {
-                    "fieldName": "routeShortName"
+                    "fieldName": "routeShortName",
+                    "displayName": "Route"
                   },
                   {
-                    "fieldName": "headsign"
+                    "fieldName": "headsign",
+                    "displayName": "Destination"
                   },
                   {
-                    "fieldName": "delay_min"
+                    "fieldName": "delay_min",
+                    "displayName": "Delay (min)"
                   },
                   {
-                    "fieldName": "speed"
+                    "fieldName": "speed",
+                    "displayName": "Speed"
                   },
                   {
-                    "fieldName": "transportationType"
+                    "fieldName": "transportationType",
+                    "displayName": "Transport Type"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column-reversed",
+                    "field": {
+                      "index": 3
+                    }
                   }
                 ]
               },
@@ -722,16 +887,16 @@
                   "datasetName": "b0e12cb1",
                   "fields": [
                     {
+                      "name": "problem_score",
+                      "expression": "`problem_score`"
+                    },
+                    {
                       "name": "transportationType",
                       "expression": "`transportationType`"
                     },
                     {
                       "name": "routeShortName",
                       "expression": "`routeShortName`"
-                    },
-                    {
-                      "name": "problem_score",
-                      "expression": "`problem_score`"
                     }
                   ],
                   "disaggregated": true
@@ -742,12 +907,15 @@
               "version": 3,
               "frame": {
                 "showTitle": true,
-                "title": "Top 10 problematic routes"
+                "title": "Most Problematic Routes",
+                "showDescription": true,
+                "description": "Problem Score combines the percentage of delayed vehicles with the average delay (minutes), highliting routes that are both frequently and significantly delayed."
               },
               "widgetType": "bar",
               "encodings": {
                 "x": {
                   "fieldName": "routeShortName",
+                  "displayName": "Route",
                   "scale": {
                     "type": "categorical",
                     "sort": {
@@ -757,13 +925,22 @@
                 },
                 "y": {
                   "fieldName": "problem_score",
+                  "displayName": "Problem Score",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "problem_score",
+                  "displayName": "problem score",
                   "scale": {
                     "type": "quantitative"
                   }
                 },
                 "extra": [
                   {
-                    "fieldName": "transportationType"
+                    "fieldName": "transportationType",
+                    "displayName": "Transport Type"
                   }
                 ]
               },
@@ -777,31 +954,6 @@
             "y": 22,
             "width": 12,
             "height": 6
-          }
-        },
-        {
-          "widget": {
-            "name": "02ba0726",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "32f12051",
-                  "disaggregated": true
-                }
-              }
-            ],
-            "spec": {
-              "version": 3,
-              "widgetType": "bar",
-              "encodings": {}
-            }
-          },
-          "position": {
-            "x": 9,
-            "y": 0,
-            "width": 3,
-            "height": 2
           }
         },
         {
@@ -832,22 +984,31 @@
             ],
             "spec": {
               "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Hourly Average Delay Trend",
+                "showDescription": true,
+                "description": "Displays the hourly average delay for the selected transportation type."
+              },
               "widgetType": "line",
               "encodings": {
                 "x": {
                   "fieldName": "hourly(hour_bucket)",
+                  "displayName": "Hour",
                   "scale": {
                     "type": "temporal"
                   }
                 },
                 "y": {
                   "fieldName": "avg_delay_min",
+                  "displayName": "Average Delay (min)",
                   "scale": {
                     "type": "quantitative"
                   }
                 },
                 "color": {
                   "fieldName": "transportationType",
+                  "displayName": "Transportation Type",
                   "scale": {
                     "type": "categorical"
                   }
@@ -863,6 +1024,64 @@
             "y": 35,
             "width": 12,
             "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "1aac6500",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8a1e00e8",
+                  "fields": [
+                    {
+                      "name": "daily(today)",
+                      "expression": "DATE_TRUNC(\"DAY\", `today`)"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "DATE_TRUNC(\"DAY\", `today`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "period": {
+                  "fieldName": "daily(today)",
+                  "format": {
+                    "type": "date",
+                    "date": "locale-number-month-full-year",
+                    "leadingZeros": true
+                  },
+                  "style": {
+                    "fontWeight": 700,
+                    "fontStyle": "normal",
+                    "fontSize": 28,
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 2
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 2
           }
         }
       ],
