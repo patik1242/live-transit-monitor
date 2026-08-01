@@ -269,11 +269,11 @@
                 "query": {
                   "fields": [
                     {
-                      "name": "gold_fleet_current__event_time",
-                      "expression": "`gold_fleet_current`.`event_time`"
+                      "name": "max(gold_fleet_current__event_time)",
+                      "expression": "MAX(`gold_fleet_current`.`event_time`)"
                     }
                   ],
-                  "disaggregated": true
+                  "disaggregated": false
                 }
               }
             ],
@@ -286,7 +286,7 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "gold_fleet_current__event_time"
+                  "fieldName": "max(gold_fleet_current__event_time)"
                 }
               },
               "data": {
