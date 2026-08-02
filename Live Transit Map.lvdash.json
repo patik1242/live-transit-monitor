@@ -109,6 +109,10 @@
                 "showTitle": true,
                 "title": "Live Transit Map - Gdańsk Tristar"
               },
+              "mark": {
+                "size": -1.4,
+                "opacity": 0.72
+              },
               "widgetType": "symbol-map",
               "encodings": {
                 "coordinates": {
