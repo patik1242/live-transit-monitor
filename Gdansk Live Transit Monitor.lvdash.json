@@ -1,0 +1,1334 @@
+{
+  "datasets": [
+    {
+      "name": "32f12051",
+      "displayName": "gold_delay_distribution",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT\r\n    delay_bucket,\r\n    transportationType,\r\n    SUM(records_count) AS records_count,\r\n    SUM(vehicles_count) AS vehicles_count\r\nFROM dbr_dev.live_transit_monitor.gold_delay_distribution\r\nGROUP BY delay_bucket, transportationType\r\nHAVING transportationType IS NOT NULL",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "b1996200",
+      "displayName": "top10_delay_routes_now",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT routeShortName, transportationType, avg_delay_min, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(delay_min) DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    GROUP BY routeShortName, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_delay_min DESC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "1fdf26b1",
+      "displayName": "top10_now_slowest_routes",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT routeShortName, transportationType, avg_speed, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(speed), 2) AS avg_speed,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(speed) ASC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    WHERE is_moving = true\r\n    GROUP BY routeShortName, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_speed ASC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "c2f9d88d",
+      "displayName": "gold_live_kpi",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n    COUNT(DISTINCT CASE WHEN is_moving = false THEN vehicleId END) AS stopped_vehicles,\r\n    COUNT(DISTINCT CASE WHEN delay > 120 THEN vehicleId END) AS delayed_vehicles,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nGROUP BY transportationType\r\nHAVING transportationType IS NOT NULL",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "9dec4948",
+      "displayName": "top10headsigns",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT headsign, active_vehicles, transportationType\r\nFROM (\r\n    SELECT\r\n        headsign,\r\n        transportationType,\r\n        SUM(active_vehicles) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY SUM(active_vehicles) DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_destination_summary\r\n    GROUP BY headsign, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY active_vehicles DESC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "b0e12cb1",
+      "displayName": "top10_delayed_routes",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT\r\n    routeShortName,\r\n    transportationType,\r\n    active_vehicles,\r\n    delayed_vehicles,\r\n    ROUND(delayed_vehicles * 100.0 / active_vehicles, 1) AS pct_delayed,\r\n    avg_delay_min,\r\n    max_delay_min,\r\n    ROUND((delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min, 1) AS problem_score\r\nFROM dbr_dev.live_transit_monitor.gold_route_summary\r\nWHERE active_vehicles >= 5 AND transportationType is not null\r\nQUALIFY ROW_NUMBER() OVER (\r\n    PARTITION BY transportationType\r\n    ORDER BY (delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min DESC\r\n) <= 10\r\nORDER BY problem_score DESC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "7d65e191",
+      "displayName": "most_delayed",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT\r\n    MAX(delay_min) AS max_delay_min,\r\n    CONCAT(MAX_BY(routeShortName, delay_min), ' (', transportationType, ')') AS route_info,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nWHERE delay_min IS NOT NULL\r\nGROUP BY transportationType\r\nHAVING transportationType IS NOT NULL",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "8532b8ce",
+      "displayName": "top10_delayed_vehicles",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT vehicleCode, routeShortName, headsign, delay_min, speed, event_time, transportationType\r\nFROM (\r\n    SELECT\r\n        vehicleCode,\r\n        routeShortName,\r\n        headsign,\r\n        delay_min,\r\n        speed,\r\n        event_time,\r\n        transportationType,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY delay_min DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    WHERE delay_min IS NOT NULL AND transportationType is not null\r\n)\r\nWHERE rn <= 10\r\nORDER BY delay_min DESC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "bbd172af",
+      "displayName": "trend",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT\r\n    DATE_TRUNC('hour', event_time) AS hour_bucket,\r\n    transportationType,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles\r\nFROM dbr_dev.live_transit_monitor.gps_positions_silver\r\nWHERE has_trip = true\r\nGROUP BY DATE_TRUNC('hour', event_time), transportationType\r\nHAVING transportationType IS NOT NULL\r\nORDER BY hour_bucket",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "8a1e00e8",
+      "displayName": "current_time",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT\r\n    CAST(CURRENT_TIMESTAMP() AS DATE) AS today",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "8bf9a663",
+      "displayName": "gold_fleet_current",
+      "config": {
+        "version": "1.1",
+        "source": "dbr_dev.live_transit_monitor.gold_fleet_current",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "143ffaaa",
+      "displayName": "Gdansk Live Transit Monitor",
+      "layout": [
+        {
+          "widget": {
+            "name": "5877fd89",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size: 36px;line-height: 1.5;color: #077A9D;\">**Gdańsk Live Transit Monitor**</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 9,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "active-vehicles",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c2f9d88d",
+                  "fields": [
+                    {
+                      "name": "sum(active_vehicles)",
+                      "expression": "SUM(`active_vehicles`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Active Vehicles:"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(active_vehicles)",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 1
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "average-delay",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c2f9d88d",
+                  "fields": [
+                    {
+                      "name": "avg_delay_min",
+                      "expression": "`avg_delay_min`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Delay"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_delay_min",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 2
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 2,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "delayed-v",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7d65e191",
+                  "fields": [
+                    {
+                      "name": "route_info",
+                      "expression": "`route_info`"
+                    },
+                    {
+                      "name": "max_delay_min",
+                      "expression": "`max_delay_min`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Max Delay"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max_delay_min",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 1
+                    }
+                  }
+                },
+                "target": {
+                  "fieldName": "route_info",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "selectionColor"
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "s1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c2f9d88d",
+                  "fields": [
+                    {
+                      "name": "sum(stopped_vehicles)",
+                      "expression": "SUM(`stopped_vehicles`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Stopped Vehicles"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(stopped_vehicles)",
+                  "style": {
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 2
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 2,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "top-10-delayed-routes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b1996200",
+                  "fields": [
+                    {
+                      "name": "avg_delay_min",
+                      "expression": "`avg_delay_min`"
+                    },
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "routeShortName",
+                      "expression": "`routeShortName`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "style": {
+                "fontColor": {
+                  "light": "#0170CC"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Current Most Delayed Routes\n",
+                "showDescription": true,
+                "description": "Ranks the routes with the highest average delay at the current moment."
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "avg_delay_min",
+                  "displayName": "Average Delay (min)",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 0
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "routeShortName",
+                  "displayName": "Route",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "avg_delay_min",
+                  "displayName": "Avg Delay",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 0
+                    }
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "transportationType"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "to1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1fdf26b1",
+                  "fields": [
+                    {
+                      "name": "avg_speed",
+                      "expression": "`avg_speed`"
+                    },
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "routeShortName",
+                      "expression": "`routeShortName`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Current Slowest Routes\n",
+                "showDescription": true,
+                "description": "Shows the routes with the lowest average vehicle speed."
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "routeShortName",
+                  "displayName": "Route",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_speed",
+                  "displayName": "Average Speed ",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "avg_speed",
+                  "displayName": "Avg Speed",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "single-hue",
+                      "baseColor": {
+                        "themeColorType": "visualizationColors",
+                        "position": 2
+                      }
+                    }
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "transportationType"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "0f754535",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "32f12051",
+                  "fields": [
+                    {
+                      "name": "sum(records_count)",
+                      "expression": "SUM(`records_count`)"
+                    },
+                    {
+                      "name": "delay_bucket",
+                      "expression": "`delay_bucket`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Delay Status Distribution",
+                "showDescription": true,
+                "description": "Shows the distribution of vehicles by delay status (On Time, Delayed, Early)."
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(records_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Vehicles"
+                },
+                "color": {
+                  "fieldName": "delay_bucket",
+                  "displayName": "Delay bucket",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "early",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 2
+                        }
+                      },
+                      {
+                        "value": "delayed",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "on_time",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 3
+                        }
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 5,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "f22e8e8c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9dec4948",
+                  "fields": [
+                    {
+                      "name": "active_vehicles",
+                      "expression": "`active_vehicles`"
+                    },
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "headsign",
+                      "expression": "`headsign`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Most Active Destinations",
+                "showDescription": true,
+                "description": "Displays the destinations currently served by the highest number of active vehicles."
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "active_vehicles",
+                  "displayName": "Active Vehicles",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "headsign",
+                  "displayName": "Destination",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "active_vehicles",
+                  "displayName": "active vehicles",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "single-hue",
+                      "baseColor": {
+                        "themeColorType": "visualizationColors",
+                        "position": 3
+                      }
+                    }
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "transportationType",
+                    "displayName": "Transport Type"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 18,
+            "width": 7,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "top-10-problematic-routes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8532b8ce",
+                  "fields": [
+                    {
+                      "name": "vehicleCode",
+                      "expression": "`vehicleCode`"
+                    },
+                    {
+                      "name": "routeShortName",
+                      "expression": "`routeShortName`"
+                    },
+                    {
+                      "name": "headsign",
+                      "expression": "`headsign`"
+                    },
+                    {
+                      "name": "delay_min",
+                      "expression": "`delay_min`"
+                    },
+                    {
+                      "name": "speed",
+                      "expression": "`speed`"
+                    },
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    }
+                  ],
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "`delay_min`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Most Delayed Vehicles",
+                "showDescription": true,
+                "description": "List the currently most delayed vehicles with key operational information for quick mentoring. "
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "vehicleCode",
+                    "displayName": "Vehicle"
+                  },
+                  {
+                    "fieldName": "routeShortName",
+                    "displayName": "Route"
+                  },
+                  {
+                    "fieldName": "headsign",
+                    "displayName": "Destination"
+                  },
+                  {
+                    "fieldName": "delay_min",
+                    "displayName": "Delay (min)"
+                  },
+                  {
+                    "fieldName": "speed",
+                    "displayName": "Speed"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "displayName": "Transport Type"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column-reversed",
+                    "field": {
+                      "index": 3
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 32,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "top-101",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b0e12cb1",
+                  "fields": [
+                    {
+                      "name": "problem_score",
+                      "expression": "`problem_score`"
+                    },
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "routeShortName",
+                      "expression": "`routeShortName`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Most Problematic Routes",
+                "showDescription": true,
+                "description": "Problem Score combines the percentage of delayed vehicles with the average delay (minutes), highliting routes that are both frequently and significantly delayed."
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "routeShortName",
+                  "displayName": "Route",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "problem_score",
+                  "displayName": "Problem Score",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "problem_score",
+                  "displayName": "problem score",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "transportationType",
+                    "displayName": "Transport Type"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 26,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "65163e01",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bbd172af",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "hourly(hour_bucket)",
+                      "expression": "DATE_TRUNC(\"HOUR\", `hour_bucket`)"
+                    },
+                    {
+                      "name": "avg_delay_min",
+                      "expression": "`avg_delay_min`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Hourly Average Delay Trend",
+                "showDescription": true,
+                "description": "Displays the hourly average delay for the selected transportation type."
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "hourly(hour_bucket)",
+                  "displayName": "Hour",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_delay_min",
+                  "displayName": "Average Delay (min)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "transportationType",
+                  "displayName": "Transportation Type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 39,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "1aac6500",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8bf9a663",
+                  "fields": [
+                    {
+                      "name": "max(event_time_local)",
+                      "expression": "MAX(`event_time_local`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Current Time"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max(event_time_local)",
+                  "style": {
+                    "fontWeight": 600,
+                    "fontStyle": "normal",
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 2
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "aa9a0b44",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "33d03a60",
+            "queries": [
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac91015c6af1c052b9c38d1d9_transportationType",
+                "query": {
+                  "datasetName": "32f12051",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac9101611a7420011c3e93d7c_transportationType",
+                "query": {
+                  "datasetName": "c2f9d88d",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac9101600a74c606a9f046068_transportationType",
+                "query": {
+                  "datasetName": "b1996200",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac910161e92fc117ce2572f78_transportationType",
+                "query": {
+                  "datasetName": "b0e12cb1",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac91016299b27c2c6de135b85_transportationType",
+                "query": {
+                  "datasetName": "8532b8ce",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac910162496ef49db1f0c1c88_transportationType",
+                "query": {
+                  "datasetName": "7d65e191",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac910160980c94ff175417194_transportationType",
+                "query": {
+                  "datasetName": "1fdf26b1",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac910161886b76bc542756554_transportationType",
+                "query": {
+                  "datasetName": "9dec4948",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dd47395114d9b578988178e0c2e_transportationType",
+                "query": {
+                  "datasetName": "bbd172af",
+                  "fields": [
+                    {
+                      "name": "transportationType",
+                      "expression": "`transportationType`"
+                    },
+                    {
+                      "name": "transportationType_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Transportation Type",
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac91015c6af1c052b9c38d1d9_transportationType"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac9101611a7420011c3e93d7c_transportationType"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac9101600a74c606a9f046068_transportationType"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac910161e92fc117ce2572f78_transportationType"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac91016299b27c2c6de135b85_transportationType"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac910162496ef49db1f0c1c88_transportationType"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac910160980c94ff175417194_transportationType"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dcac910161886b76bc542756554_transportationType"
+                  },
+                  {
+                    "fieldName": "transportationType",
+                    "queryName": "dashboards/01f18dcac90f14318377fc559d6f67e3/datasets/01f18dd47395114d9b578988178e0c2e_transportationType"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
