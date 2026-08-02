@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+gps_landing/
+gps_data.json
+.claude/
+*.pem
+eh.env
+*.env
