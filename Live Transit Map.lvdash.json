@@ -286,7 +286,15 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "max(gold_fleet_current__event_time_local)"
+                  "fieldName": "max(gold_fleet_current__event_time_local)",
+                  "style": {
+                    "fontWeight": 600,
+                    "fontStyle": "normal",
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 2
+                    }
+                  }
                 }
               },
               "data": {
