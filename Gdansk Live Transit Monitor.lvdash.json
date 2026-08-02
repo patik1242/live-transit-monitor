@@ -647,6 +647,7 @@
                 },
                 "color": {
                   "fieldName": "delay_bucket",
+                  "displayName": "Delay bucket",
                   "scale": {
                     "type": "categorical",
                     "mappings": [
