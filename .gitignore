@@ -4,6 +4,6 @@ __pycache__/
 gps_landing/
 gps_data.json
 .claude/
-.pem
+*.pem
 eh.env
 *.env
