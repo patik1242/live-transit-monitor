@@ -205,6 +205,27 @@
           }
         ]
       }
+    },
+    {
+      "name": "8bf9a663",
+      "displayName": "gold_fleet_current",
+      "config": {
+        "version": "1.1",
+        "source": "dbr_dev.live_transit_monitor.gold_fleet_current",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
     }
   ],
   "pages": [
@@ -1034,38 +1055,30 @@
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "8a1e00e8",
+                  "datasetName": "8bf9a663",
                   "fields": [
                     {
-                      "name": "daily(today)",
-                      "expression": "DATE_TRUNC(\"DAY\", `today`)"
+                      "name": "max(event_time_local)",
+                      "expression": "MAX(`event_time_local`)"
                     }
                   ],
-                  "disaggregated": false,
-                  "orders": [
-                    {
-                      "direction": "DESC",
-                      "expression": "DATE_TRUNC(\"DAY\", `today`)"
-                    }
-                  ]
+                  "disaggregated": false
                 }
               }
             ],
             "spec": {
               "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Current Time"
+              },
               "widgetType": "counter",
               "encodings": {
-                "period": {
-                  "fieldName": "daily(today)",
-                  "format": {
-                    "type": "date",
-                    "date": "locale-number-month-full-year",
-                    "leadingZeros": true
-                  },
+                "value": {
+                  "fieldName": "max(event_time_local)",
                   "style": {
-                    "fontWeight": 700,
+                    "fontWeight": 600,
                     "fontStyle": "normal",
-                    "fontSize": 28,
                     "fontColor": {
                       "themeColorType": "visualizationColors",
                       "position": 2
