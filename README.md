@@ -38,8 +38,8 @@ flowchart LR
     BR2 --> S
     S --> G["Gold<br/>gold_fleet_current, KPIs, summaries"]
 
-    G --> DASH["AI/BI dashboard"]
-    G --> MAP["Streamlit live map"]
+    G --> DASH["AI/BI KPI dashboard"]
+    G --> MAP["Live map<br/>(AI/BI + Streamlit)"]
 ```
 
 Everything lands in a **Unity-Catalog-governed** catalog (`dbr_dev`), with credentials held in
@@ -61,8 +61,9 @@ a **Key Vault-backed secret scope**.
 | `06_schema_evolution_demo.py` | Isolated demo pipeline showing schema evolution (new `occupancy` field) into `gps_data_demo`. |
 | `demo_producer.py` | On-demand local producer that injects synthetic events carrying the new field. |
 | `DEMO_RUNBOOK.md` | Step-by-step runbook and narration for the schema-evolution demo. |
-| `Gdansk Live Transit Monitor.lvdash.json` | AI/BI (Lakeview) dashboard definition. |
-| `app.py` | Streamlit live map (reads gold via the Databricks SQL connector). |
+| `Gdansk Live Transit Monitor.lvdash.json` | AI/BI (Lakeview) KPI dashboard definition. |
+| `Live Transit Map.lvdash.json` | AI/BI (Lakeview) live map dashboard — fleet positions coloured by delay. |
+| `app.py` | Streamlit live map — **in progress**; reads gold via the Databricks SQL connector. |
 
 ---
 
@@ -150,11 +151,13 @@ the pipeline is CI/CD-ready and can target another catalog without code changes:
 
 ## Serving
 
-- **AI/BI dashboard** (`Gdansk Live Transit Monitor`) — KPIs, a point map and summary tables,
-  running on a serverless SQL warehouse over the gold/silver tables.
-- **Streamlit live map** (`app.py`) — a Folium map that reads `gold_fleet_current` through the
-  Databricks SQL connector and auto-refreshes every 20 s, colouring vehicles by delay bucket. It
-  lets a non-Databricks audience view the live fleet.
+- **AI/BI KPI dashboard** (`Gdansk Live Transit Monitor`) — KPIs and summary tables, running on a
+  serverless SQL warehouse over the gold/silver tables.
+- **AI/BI live map** (`Live Transit Map`) — a Lakeview dashboard that plots `gold_fleet_current` on
+  a point map, colouring vehicles by delay bucket, refreshed on a schedule off the gold tables.
+- **Streamlit live map** (`app.py`) — *in progress / potential for production.* A Folium map that
+  reads `gold_fleet_current` through the Databricks SQL connector and auto-refreshes every 20 s,
+  intended to let a non-Databricks audience view the live fleet outside the workspace.
 
 ---
 
@@ -184,8 +187,7 @@ the pipeline is CI/CD-ready and can target another catalog without code changes:
 | Area | Owner |
 | --- | --- |
 | Streaming ingestion, silver, live map, schema-evolution demo | Gabriela |
-| Infrastructure & repository | Patryk |
-| Dashboard & gold layer, Event Hub retention | Patrycja |
+| Infrastructure & repository, dashboard & gold layer, Event Hub retention | Patrycja |
 | Batch ingestion (GTFS & vehicles) | Radek |
 
 ---
