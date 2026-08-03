@@ -141,16 +141,20 @@
                 },
                 "extra": [
                   {
-                    "fieldName": "gold_fleet_current__routeShortName"
+                    "fieldName": "gold_fleet_current__routeShortName",
+                    "displayName": "Route Name"
                   },
                   {
-                    "fieldName": "gold_fleet_current__transportationType"
+                    "fieldName": "gold_fleet_current__transportationType",
+                    "displayName": "Transporation Type"
                   },
                   {
-                    "fieldName": "gold_fleet_current__delay_min"
+                    "fieldName": "gold_fleet_current__delay_min",
+                    "displayName": "Delay in Minutes"
                   },
                   {
-                    "fieldName": "gold_fleet_current__speed"
+                    "fieldName": "gold_fleet_current__speed",
+                    "displayName": "Speed"
                   }
                 ]
               },
