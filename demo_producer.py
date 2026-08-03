@@ -1,16 +1,6 @@
 """Demo producer — injects synthetic vehicle events WITH the new `occupancy`
 field into the SAME Event Hub the VM producer uses.
-
-Run this from your laptop, on demand, during the schema-evolution demo.
-It does NOT touch the VM producer or production data.
-
-Setup (once, on your laptop):
-    pip install azure-eventhub
-    set EH_CONN_STR = <the SEND connection string, same as the VM>
-    set EH_NAME     = <the Event Hub name, e.g. live_transit_monitor_evh>
-
-Run (each run sends 10 events with occupancy):
-    python demo_producer.py
+Each run sends 10 events with occupancy
 """
 
 import os
@@ -22,9 +12,9 @@ from azure.eventhub import EventHubProducerClient, EventData
 
 load_dotenv()  # load .env file if present
 
-CONN = os.environ["EH_CONN_STR"]     # SEND connection string (same as VM producer)
-EH   = os.environ["EH_NAME"]         # Event Hub name
-N    = int(os.environ.get("N", "10"))  # how many demo events to send
+CONN = os.environ["EH_CONN_STR"]     
+EH   = os.environ["EH_NAME"]        
+N    = int(os.environ.get("N", "10"))  
 
 
 def demo_event(i: int) -> dict:
@@ -36,7 +26,7 @@ def demo_event(i: int) -> dict:
         "tripId": None,
         "routeId": 999,
         "headsign": "DEMO",
-        "vehicleCode": f"D{i:03d}",         # D000, D001, ... -> easy to spot
+        "vehicleCode": f"D{i:03d}",         # D000, D001
         "vehicleService": "demo",
         "vehicleId": 900000 + i,
         "speed": 20,
