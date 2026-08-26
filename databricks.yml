@@ -59,8 +59,8 @@ targets:
       host: https://dbc-8697dee0-e1e6.cloud.databricks.com
     variables:
       catalog: workspace
-      bronze_schema: bronze
-      silver_schema: silver
+      bronze_schema: live_transit_monitor
+      silver_schema: live_transit_monitor
     resources:
       jobs:
         silver_pipeline:
