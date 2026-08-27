@@ -87,10 +87,6 @@
                       "expression": "`gold_fleet_current`.`routeShortName`"
                     },
                     {
-                      "name": "gold_fleet_current__transportationType",
-                      "expression": "`gold_fleet_current`.`transportationType`"
-                    },
-                    {
                       "name": "gold_fleet_current__delay_min",
                       "expression": "`gold_fleet_current`.`delay_min`"
                     },
@@ -104,11 +100,14 @@
               }
             ],
             "spec": {
-              "version": 2,
               "frame": {
                 "showTitle": true,
-                "title": "Live Transit Map - Gdańsk Tristar"
+                "title": {
+                  "value": "Live Transit Map - Gdańsk Tristar",
+                  "fields": []
+                }
               },
+              "version": 2,
               "mark": {
                 "size": -1.4,
                 "opacity": 0.72
@@ -143,10 +142,6 @@
                   {
                     "fieldName": "gold_fleet_current__routeShortName",
                     "displayName": "Route Name"
-                  },
-                  {
-                    "fieldName": "gold_fleet_current__transportationType",
-                    "displayName": "Transportation Type"
                   },
                   {
                     "fieldName": "gold_fleet_current__delay_min",
@@ -286,23 +281,18 @@
               }
             ],
             "spec": {
-              "version": 2,
               "frame": {
                 "showTitle": true,
-                "title": "Current Date and Time"
+                "title": {
+                  "value": "Current Date and Time",
+                  "fields": []
+                }
               },
+              "version": 2,
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "max(gold_fleet_current__event_time_local)",
-                  "style": {
-                    "fontWeight": 600,
-                    "fontStyle": "normal",
-                    "fontColor": {
-                      "themeColorType": "visualizationColors",
-                      "position": 2
-                    }
-                  }
+                  "fieldName": "max(gold_fleet_current__event_time_local)"
                 }
               },
               "data": {
@@ -335,11 +325,14 @@
               }
             ],
             "spec": {
-              "version": 2,
               "frame": {
                 "showTitle": true,
-                "title": "Delayed Vehicles"
+                "title": {
+                  "value": "Delayed Vehicles",
+                  "fields": []
+                }
               },
+              "version": 2,
               "widgetType": "counter",
               "encodings": {
                 "value": {
@@ -403,8 +396,8 @@
                 "query": {
                   "fields": [
                     {
-                      "name": "sum(gold_live_kpi__avg_delay_min)",
-                      "expression": "SUM(`gold_live_kpi`.`avg_delay_min`)"
+                      "name": "avg(gold_fleet_current__delay_min)",
+                      "expression": "AVG(`gold_fleet_current`.`delay_min`)"
                     }
                   ],
                   "disaggregated": false
@@ -412,15 +405,18 @@
               }
             ],
             "spec": {
-              "version": 2,
               "frame": {
                 "showTitle": true,
-                "title": "Average Delay in Minutes"
+                "title": {
+                  "value": "Average Delay in Minutes",
+                  "fields": []
+                }
               },
+              "version": 2,
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(gold_live_kpi__avg_delay_min)",
+                  "fieldName": "avg(gold_fleet_current__delay_min)",
                   "style": {
                     "fontWeight": 600,
                     "fontStyle": "normal"
@@ -448,8 +444,8 @@
                 "query": {
                   "fields": [
                     {
-                      "name": "sum(gold_live_kpi__stopped_vehicles)",
-                      "expression": "SUM(`gold_live_kpi`.`stopped_vehicles`)"
+                      "name": "countdistinct(gold_live_kpi__stopped_vehicles)",
+                      "expression": "COUNT(DISTINCT `gold_live_kpi`.`stopped_vehicles`)"
                     }
                   ],
                   "disaggregated": false
@@ -457,15 +453,18 @@
               }
             ],
             "spec": {
-              "version": 2,
               "frame": {
                 "showTitle": true,
-                "title": "Stopped Vehicles"
+                "title": {
+                  "value": "Stopped Vehicles",
+                  "fields": []
+                }
               },
+              "version": 2,
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(gold_live_kpi__stopped_vehicles)",
+                  "fieldName": "countdistinct(gold_live_kpi__stopped_vehicles)",
                   "style": {
                     "fontWeight": 600,
                     "fontStyle": "normal"

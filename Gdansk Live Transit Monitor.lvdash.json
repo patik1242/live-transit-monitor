@@ -228,6 +228,56 @@
       }
     }
   ],
+  "relationshipGraphs": [
+    {
+      "sources": [
+        {
+          "name": "gold_delay_distribution",
+          "datasetName": "32f12051"
+        },
+        {
+          "name": "top10_delay_routes_now",
+          "datasetName": "b1996200"
+        },
+        {
+          "name": "top10_now_slowest_routes",
+          "datasetName": "1fdf26b1"
+        },
+        {
+          "name": "gold_live_kpi",
+          "datasetName": "c2f9d88d"
+        },
+        {
+          "name": "top10headsigns",
+          "datasetName": "9dec4948"
+        },
+        {
+          "name": "top10_delayed_routes",
+          "datasetName": "b0e12cb1"
+        },
+        {
+          "name": "most_delayed",
+          "datasetName": "7d65e191"
+        },
+        {
+          "name": "top10_delayed_vehicles",
+          "datasetName": "8532b8ce"
+        },
+        {
+          "name": "trend",
+          "datasetName": "bbd172af"
+        },
+        {
+          "name": "current_time",
+          "datasetName": "8a1e00e8"
+        },
+        {
+          "name": "gold_fleet_current",
+          "datasetName": "8bf9a663"
+        }
+      ]
+    }
+  ],
   "pages": [
     {
       "name": "143ffaaa",

@@ -92,7 +92,7 @@ targets:
     variables:
       catalog: dbr_dev
       bronze_schema: live_transit_monitor
-      silver_schema: live_transite_monitor
+      silver_schema: live_transit_monitor
     resources:
       jobs:
         silver_pipeline:
