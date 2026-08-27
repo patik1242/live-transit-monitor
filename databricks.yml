@@ -47,6 +47,10 @@ resources:
         bronze_schema: ${var.bronze_schema}
         silver_schema: ${var.silver_schema}
 
+      environment:
+        dependencies:
+          - databricks-labs-dqx
+
 targets:
 
   # ===========================================================================
