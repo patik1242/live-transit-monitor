@@ -146,7 +146,7 @@
                   },
                   {
                     "fieldName": "gold_fleet_current__transportationType",
-                    "displayName": "Transporation Type"
+                    "displayName": "Transportation Type"
                   },
                   {
                     "fieldName": "gold_fleet_current__delay_min",

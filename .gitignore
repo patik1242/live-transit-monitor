@@ -7,3 +7,5 @@ gps_data.json
 *.pem
 eh.env
 *.env
+.streamlit/secrets.toml
+secrets.toml
