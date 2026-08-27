@@ -88,6 +88,7 @@ targets:
     mode: production           # schedule ACTIVE
     workspace:
       host: https://adb-7405604503619901.1.azuredatabricks.net
+      root_path: /Workspace/Users/gabrielajaniszews786@softserve.academy/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: dbr_dev
       bronze_schema: live_transit_monitor
