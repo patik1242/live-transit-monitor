@@ -68,14 +68,14 @@ def checked():
 @dp.table(name=TABLES["valid"])
 def valid():
     return (spark.readStream.table(TABLES["checked"])
-            .filter("_error IS NULL")
-            .drop("_error", "_warning"))
+            .filter("_errors IS NULL")
+            .drop("_errors", "_warning"))
 
 
 # 3) QUARANTINE — bad rows, keep the DQX error detail
 @dp.table(name=TABLES["quarantine"])
 def quarantine():
-    return spark.readStream.table(TABLES["checked"]).filter("_error IS NOT NULL")
+    return spark.readStream.table(TABLES["checked"]).filter("_errors IS NOT NULL")
 
 
 # 4) SILVER (final) — idempotent CDC dedup on the valid stream
