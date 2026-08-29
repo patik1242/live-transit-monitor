@@ -1,0 +1,907 @@
+{
+  "datasets": [
+    {
+      "name": "fe6b89c2",
+      "displayName": "gold_dq_by_reason",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.live_transit_monitor.gold_dq_by_reason",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "0dae7af2",
+      "displayName": "gold_dq_trend",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.live_transit_monitor.gold_dq_trend",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "a2822bbd",
+      "displayName": "gold_dq_reasons",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.live_transit_monitor.gold_dq_reasons",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "24e8f98b",
+      "displayName": "gold_dq_top_offenders",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.live_transit_monitor.gold_dq_top_offenders",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "71020b4e",
+      "displayName": "gold_dq_warnings",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.live_transit_monitor.gold_dq_warnings",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "e9a08e15",
+      "displayName": "gold_reconciliation",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.live_transit_monitor.gold_reconciliation",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "49a58902",
+      "displayName": "Data Quality",
+      "layout": [
+        {
+          "widget": {
+            "name": "average-quarantine-rate-percent",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0dae7af2",
+                  "fields": [
+                    {
+                      "name": "avg(quarantine_rate_pct)",
+                      "expression": "AVG(`quarantine_rate_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Average Quarantine Rate %",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(quarantine_rate_pct)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "warn-rate-percent",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0dae7af2",
+                  "fields": [
+                    {
+                      "name": "warn_rate_pct",
+                      "expression": "`warn_rate_pct`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Warn Rate %",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "warn_rate_pct"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "total-records-processed",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0dae7af2",
+                  "fields": [
+                    {
+                      "name": "sum(total_records)",
+                      "expression": "SUM(`total_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total Records Processed",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_records)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "split-ok",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e9a08e15",
+                  "fields": [
+                    {
+                      "name": "split_ok",
+                      "expression": "`split_ok`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Split OK",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "split_ok",
+                  "style": {
+                    "rules": [
+                      {
+                        "condition": {
+                          "operand": {
+                            "type": "data-value",
+                            "value": "true"
+                          },
+                          "operator": "="
+                        },
+                        "color": "#00A972"
+                      },
+                      {
+                        "condition": {
+                          "operand": {
+                            "type": "data-value",
+                            "value": "false"
+                          },
+                          "operator": "="
+                        },
+                        "fontColor": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      }
+                    ]
+                  },
+                  "format": {
+                    "type": "alias",
+                    "mappings": [
+                      {
+                        "value": "true",
+                        "alias": "✓"
+                      },
+                      {
+                        "value": "false",
+                        "alias": "✗"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "0d0cf75b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e9a08e15",
+                  "fields": [
+                    {
+                      "name": "checked_eq_bronze",
+                      "expression": "`checked_eq_bronze`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Equal with Bronze",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "checked_eq_bronze",
+                  "style": {
+                    "rules": [
+                      {
+                        "condition": {
+                          "operand": {
+                            "type": "data-value",
+                            "value": "true"
+                          },
+                          "operator": "="
+                        },
+                        "color": "#00A972"
+                      },
+                      {
+                        "condition": {
+                          "operand": {
+                            "type": "data-value",
+                            "value": "false"
+                          },
+                          "operator": "="
+                        },
+                        "fontColor": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      }
+                    ]
+                  },
+                  "format": {
+                    "type": "alias",
+                    "mappings": [
+                      {
+                        "value": "true",
+                        "alias": "✓"
+                      },
+                      {
+                        "value": "false",
+                        "alias": "✗"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "reconciliation-rates",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e9a08e15",
+                  "fields": [
+                    {
+                      "name": "snapshot_time",
+                      "expression": "`snapshot_time`"
+                    },
+                    {
+                      "name": "bronze_count",
+                      "expression": "`bronze_count`"
+                    },
+                    {
+                      "name": "checked_count",
+                      "expression": "`checked_count`"
+                    },
+                    {
+                      "name": "quarantine_count",
+                      "expression": "`quarantine_count`"
+                    },
+                    {
+                      "name": "silver_count",
+                      "expression": "`silver_count`"
+                    },
+                    {
+                      "name": "valid_count",
+                      "expression": "`valid_count`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": {
+                  "value": "<span style=\"font-size: 18px;\">Reconcilation Rates</span>",
+                  "fields": []
+                },
+                "description": {
+                  "value": "Row-count reconciliation across the medallion. ",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "snapshot_time",
+                    "displayName": "Snapshot Time"
+                  },
+                  {
+                    "fieldName": "bronze_count",
+                    "displayName": "Bronze Count"
+                  },
+                  {
+                    "fieldName": "checked_count",
+                    "displayName": "Checked Count"
+                  },
+                  {
+                    "fieldName": "quarantine_count",
+                    "displayName": "Quarantine Count"
+                  },
+                  {
+                    "fieldName": "silver_count",
+                    "displayName": "Silver Count"
+                  },
+                  {
+                    "fieldName": "valid_count",
+                    "displayName": "Valid Count"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "quarantine-rate-over-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0dae7af2",
+                  "fields": [
+                    {
+                      "name": "hourly(hour_ts)",
+                      "expression": "DATE_TRUNC(\"HOUR\", `hour_ts`)"
+                    },
+                    {
+                      "name": "quarantine_rate_pct",
+                      "expression": "`quarantine_rate_pct`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": {
+                  "value": "<span style=\"font-size: 18px;\">Quarantine Rate over Time</span>",
+                  "fields": []
+                },
+                "description": {
+                  "value": "Percentage of GPS records dropped by data-quality rules, per hour. Trends the quality of the provider's feed over time – a rising line signals degrading source data.",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "hourly(hour_ts)",
+                  "displayName": "Time",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "quarantine_rate_pct",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "Quarantine Rate %",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "errors-per-reason",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fe6b89c2",
+                  "fields": [
+                    {
+                      "name": "check_name",
+                      "expression": "`check_name`"
+                    },
+                    {
+                      "name": "sum(failed_records)",
+                      "expression": "SUM(`failed_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": {
+                  "value": "<span style=\"font-size: 18px;\">Errors per reason</span>",
+                  "fields": []
+                },
+                "description": {
+                  "value": "Quarantined records by failed DQX rule. A single record can fail several rules, so bars may sum to more than the number of quarantined records. Shows which fields the provider gets wrong most often.",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "check_name",
+                  "axis": {
+                    "title": "Fail Reason"
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(failed_records)",
+                  "displayName": "Count of Failed Records",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "check_name",
+                  "displayName": "Fail reason",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "0310b1ba",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71020b4e",
+                  "fields": [
+                    {
+                      "name": "check_name",
+                      "expression": "`check_name`"
+                    },
+                    {
+                      "name": "sum(warned_records)",
+                      "expression": "SUM(`warned_records`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": {
+                  "value": "<span style=\"font-size: 18px;\">Warnings per Reason</span>",
+                  "fields": []
+                },
+                "description": {
+                  "value": "Records flagged by warn-level rules. These records are kept in silver – not dropped – but signal degraded quality (weak GPS signal) worth reporting back to the operator.",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "check_name",
+                  "displayName": "Warning Type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(warned_records)",
+                  "displayName": "Count of Warnings",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "check_name",
+                  "displayName": "Warning Type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 11,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "top-offenders",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "24e8f98b",
+                  "fields": [
+                    {
+                      "name": "vehicleCode",
+                      "expression": "`vehicleCode`"
+                    },
+                    {
+                      "name": "vehicleId",
+                      "expression": "`vehicleId`"
+                    },
+                    {
+                      "name": "error_rate_pct",
+                      "expression": "`error_rate_pct`"
+                    },
+                    {
+                      "name": "error_readings",
+                      "expression": "`error_readings`"
+                    },
+                    {
+                      "name": "total_readings",
+                      "expression": "`total_readings`"
+                    }
+                  ],
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`error_rate_pct`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": {
+                  "value": "<span style=\"font-size: 18px;\">Top Offenders</span>",
+                  "fields": []
+                },
+                "description": {
+                  "value": "Vehicles ranked by error rate (bad readings ÷ total readings), so high-traffic vehicles aren't penalised for volume alone. A minimum-readings threshold filters out low-volume vehicles.",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "vehicleCode"
+                  },
+                  {
+                    "fieldName": "vehicleId"
+                  },
+                  {
+                    "fieldName": "error_rate_pct"
+                  },
+                  {
+                    "fieldName": "error_readings"
+                  },
+                  {
+                    "fieldName": "total_readings"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 2
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 5,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
