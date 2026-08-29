@@ -115,7 +115,7 @@ targets:
                   bronze_schema: ${var.silver_schema}                  
             - task_key: gold_data_quality
               depends_on:
-                - task_key: gold_dqx
+                - task_key: silver_ldp
               notebook_task:
                 notebook_path: ./gold/08_gold_dqx.ipynb
                 base_parameters:
@@ -194,7 +194,7 @@ targets:
                   bronze_schema: ${var.silver_schema}
             - task_key: gold_data_quality
               depends_on:
-                - task_key: gold_dqx
+                - task_key: silver_ldp
               notebook_task:
                 notebook_path: ./gold/08_gold_dqx.ipynb
                 base_parameters:
