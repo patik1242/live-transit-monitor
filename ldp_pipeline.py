@@ -57,7 +57,7 @@ def _enrich(df):
             F.from_utc_timestamp("event_time", "Europe/Warsaw")))
 
 
-# 1) CHECKED — enrich, then apply DQX (adds _error/_warning, keeps ALL rows)
+# 1) CHECKED — enrich, then apply DQX (adds _errors/_warnings, keeps ALL rows)
 @dp.table(name=TABLES["checked"])
 def checked():
     df = _enrich(spark.readStream.table(BRONZE_GPS))
@@ -68,14 +68,14 @@ def checked():
 @dp.table(name=TABLES["valid"])
 def valid():
     return (spark.readStream.table(TABLES["checked"])
-            .filter("_error IS NULL")
-            .drop("_error", "_warning"))
+            .filter("_errors IS NULL")
+            .drop("_errors", "_warnings"))
 
 
 # 3) QUARANTINE — bad rows, keep the DQX error detail
 @dp.table(name=TABLES["quarantine"])
 def quarantine():
-    return spark.readStream.table(TABLES["checked"]).filter("_error IS NOT NULL")
+    return spark.readStream.table(TABLES["checked"]).filter("_errors IS NOT NULL")
 
 
 # 4) SILVER (final) — idempotent CDC dedup on the valid stream
