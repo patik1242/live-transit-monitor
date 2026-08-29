@@ -6,6 +6,7 @@
 
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
+from silver_transformation import add_derived_columns
 
 # --- Parameters: from the pipeline configuration ---
 # dev  -> catalog=workspace, bronze_schema=live_transit_monitor
@@ -39,24 +40,7 @@ TABLES = {
     "vehicle_present": "vehicleId IS NOT NULL",
 })
 def silver_clean():
-    return (
-        spark.readStream.table(BRONZE_GPS)
-        .withColumn("generated",              F.to_timestamp("generated"))
-        .withColumn("lastUpdate",             F.to_timestamp("lastUpdate"))
-        .withColumn("scheduledTripStartTime", F.to_timestamp("scheduledTripStartTime"))
-        .withColumn("delay_min",   F.round(F.col("delay") / 60.0, 1))
-        .withColumn("has_trip",    F.col("tripId").isNotNull())
-        .withColumn("delay_bucket",
-            F.when(F.col("delay") < -60, "early")
-             .when(F.col("delay") <= 120, "on_time")
-             .otherwise("delayed"))
-        .withColumn("is_delayed",  F.col("delay") > 120)
-        .withColumn("is_stopped",  F.col("speed") == 0)
-        .withColumn("is_moving",   F.col("speed") > 0)
-        .withColumn("gps_ok",      F.col("gpsQuality") > 0)
-        .withColumn("event_time_local",
-            F.from_utc_timestamp("event_time", "Europe/Warsaw"))
-    )
+    return (add_derived_columns(spark.readStream.table(BRONZE_GPS)))
 
 # ===================================================================
 # SILVER (final) — idempotent dedup via CDC.
