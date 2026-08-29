@@ -7,7 +7,7 @@
 #
 ##
 # Deploy dev:   databricks bundle deploy -t dev
-# Run job:      databricks bundle run silver_pipeline    -t dev
+# Run job:      databricks bundle run transit_gps_stream    -t dev
 # Run pipeline: databricks bundle run transit_silver_ldp  -t dev
 # Deploy prod:  databricks bundle deploy -t prod
 
@@ -47,7 +47,9 @@ resources:
         bronze_schema: ${var.bronze_schema}
         silver_schema: ${var.silver_schema}
 
-targets:
+      environment:
+          dependencies:
+            - databricks-labs-dqx
 
   # ===========================================================================
   # DEV  —  Free Edition
@@ -145,7 +147,7 @@ targets:
           tasks:
 
             # --- Bronze: gps positions ---
-            - task_key: gps_consumer
+            - task_key: bronze
               notebook_task:
                 notebook_path: ./bronze_streaming/02_gps_consumer.ipynb
                 base_parameters:
