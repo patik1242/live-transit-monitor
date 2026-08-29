@@ -5,7 +5,7 @@
       "displayName": "gold_delay_distribution",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    delay_bucket,\r\n    transportationType,\r\n    SUM(records_count) AS records_count,\r\n    SUM(vehicles_count) AS vehicles_count\r\nFROM dbr_dev.live_transit_monitor.gold_delay_distribution\r\nGROUP BY delay_bucket, transportationType\r\nHAVING transportationType IS NOT NULL",
+        "source": "SELECT\r\n    delay_bucket,\r\n    transportationType,\r\n    SUM(records_count) AS records_count,\r\n    SUM(vehicles_count) AS vehicles_count\r\nFROM live_transit_monitor.gold_delay_distribution\r\nGROUP BY delay_bucket, transportationType\r\nHAVING transportationType IS NOT NULL",
         "dimensions": [
           {
             "expr": "source.*"
@@ -26,7 +26,7 @@
       "displayName": "top10_delay_routes_now",
       "config": {
         "version": "1.1",
-        "source": "SELECT routeShortName, transportationType, avg_delay_min, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(delay_min) DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    GROUP BY routeShortName, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_delay_min DESC",
+        "source": "SELECT routeShortName, transportationType, avg_delay_min, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(delay_min) DESC\r\n        ) AS rn\r\n    FROM live_transit_monitor.gold_fleet_current\r\n    GROUP BY routeShortName, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_delay_min DESC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -46,7 +46,7 @@
       "displayName": "top10_now_slowest_routes",
       "config": {
         "version": "1.1",
-        "source": "SELECT routeShortName, transportationType, avg_speed, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(speed), 2) AS avg_speed,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(speed) ASC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    WHERE is_moving = true\r\n    GROUP BY routeShortName, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_speed ASC",
+        "source": "SELECT routeShortName, transportationType, avg_speed, active_vehicles\r\nFROM (\r\n    SELECT\r\n        routeShortName,\r\n        transportationType,\r\n        ROUND(AVG(speed), 2) AS avg_speed,\r\n        COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY AVG(speed) ASC\r\n        ) AS rn\r\n    FROM live_transit_monitor.gold_fleet_current\r\n    WHERE is_moving = true\r\n    GROUP BY routeShortName, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY avg_speed ASC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -66,7 +66,7 @@
       "displayName": "gold_live_kpi",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n    COUNT(DISTINCT CASE WHEN is_moving = false THEN vehicleId END) AS stopped_vehicles,\r\n    COUNT(DISTINCT CASE WHEN delay > 120 THEN vehicleId END) AS delayed_vehicles,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nGROUP BY transportationType\r\nHAVING transportationType IS NOT NULL",
+        "source": "SELECT\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles,\r\n    COUNT(DISTINCT CASE WHEN is_moving = false THEN vehicleId END) AS stopped_vehicles,\r\n    COUNT(DISTINCT CASE WHEN delay > 120 THEN vehicleId END) AS delayed_vehicles,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    transportationType\r\nFROM live_transit_monitor.gold_fleet_current\r\nGROUP BY transportationType\r\nHAVING transportationType IS NOT NULL",
         "dimensions": [
           {
             "expr": "source.*"
@@ -87,7 +87,7 @@
       "displayName": "top10headsigns",
       "config": {
         "version": "1.1",
-        "source": "SELECT headsign, active_vehicles, transportationType\r\nFROM (\r\n    SELECT\r\n        headsign,\r\n        transportationType,\r\n        SUM(active_vehicles) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY SUM(active_vehicles) DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_destination_summary\r\n    GROUP BY headsign, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY active_vehicles DESC",
+        "source": "SELECT headsign, active_vehicles, transportationType\r\nFROM (\r\n    SELECT\r\n        headsign,\r\n        transportationType,\r\n        SUM(active_vehicles) AS active_vehicles,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY SUM(active_vehicles) DESC\r\n        ) AS rn\r\n    FROM live_transit_monitor.gold_destination_summary\r\n    GROUP BY headsign, transportationType\r\n    HAVING transportationType IS NOT NULL\r\n)\r\nWHERE rn <= 10\r\nORDER BY active_vehicles DESC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -108,7 +108,7 @@
       "displayName": "top10_delayed_routes",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    routeShortName,\r\n    transportationType,\r\n    active_vehicles,\r\n    delayed_vehicles,\r\n    ROUND(delayed_vehicles * 100.0 / active_vehicles, 1) AS pct_delayed,\r\n    avg_delay_min,\r\n    max_delay_min,\r\n    ROUND((delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min, 1) AS problem_score\r\nFROM dbr_dev.live_transit_monitor.gold_route_summary\r\nWHERE active_vehicles >= 5 AND transportationType is not null\r\nQUALIFY ROW_NUMBER() OVER (\r\n    PARTITION BY transportationType\r\n    ORDER BY (delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min DESC\r\n) <= 10\r\nORDER BY problem_score DESC",
+        "source": "SELECT\r\n    routeShortName,\r\n    transportationType,\r\n    active_vehicles,\r\n    delayed_vehicles,\r\n    ROUND(delayed_vehicles * 100.0 / active_vehicles, 1) AS pct_delayed,\r\n    avg_delay_min,\r\n    max_delay_min,\r\n    ROUND((delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min, 1) AS problem_score\r\nFROM live_transit_monitor.gold_route_summary\r\nWHERE active_vehicles >= 5 AND transportationType is not null\r\nQUALIFY ROW_NUMBER() OVER (\r\n    PARTITION BY transportationType\r\n    ORDER BY (delayed_vehicles * 100.0 / active_vehicles) * avg_delay_min DESC\r\n) <= 10\r\nORDER BY problem_score DESC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -129,7 +129,7 @@
       "displayName": "most_delayed",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    MAX(delay_min) AS max_delay_min,\r\n    CONCAT(MAX_BY(routeShortName, delay_min), ' (', transportationType, ')') AS route_info,\r\n    transportationType\r\nFROM dbr_dev.live_transit_monitor.gold_fleet_current\r\nWHERE delay_min IS NOT NULL\r\nGROUP BY transportationType\r\nHAVING transportationType IS NOT NULL",
+        "source": "SELECT\r\n    MAX(delay_min) AS max_delay_min,\r\n    CONCAT(MAX_BY(routeShortName, delay_min), ' (', transportationType, ')') AS route_info,\r\n    transportationType\r\nFROM live_transit_monitor.gold_fleet_current\r\nWHERE delay_min IS NOT NULL\r\nGROUP BY transportationType\r\nHAVING transportationType IS NOT NULL",
         "dimensions": [
           {
             "expr": "source.*"
@@ -149,7 +149,7 @@
       "displayName": "top10_delayed_vehicles",
       "config": {
         "version": "1.1",
-        "source": "SELECT vehicleCode, routeShortName, headsign, delay_min, speed, event_time, transportationType\r\nFROM (\r\n    SELECT\r\n        vehicleCode,\r\n        routeShortName,\r\n        headsign,\r\n        delay_min,\r\n        speed,\r\n        event_time,\r\n        transportationType,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY delay_min DESC\r\n        ) AS rn\r\n    FROM dbr_dev.live_transit_monitor.gold_fleet_current\r\n    WHERE delay_min IS NOT NULL AND transportationType is not null\r\n)\r\nWHERE rn <= 10\r\nORDER BY delay_min DESC",
+        "source": "SELECT vehicleCode, routeShortName, headsign, delay_min, speed, event_time, transportationType\r\nFROM (\r\n    SELECT\r\n        vehicleCode,\r\n        routeShortName,\r\n        headsign,\r\n        delay_min,\r\n        speed,\r\n        event_time,\r\n        transportationType,\r\n        ROW_NUMBER() OVER (\r\n            PARTITION BY transportationType\r\n            ORDER BY delay_min DESC\r\n        ) AS rn\r\n    FROM live_transit_monitor.gold_fleet_current\r\n    WHERE delay_min IS NOT NULL AND transportationType is not null\r\n)\r\nWHERE rn <= 10\r\nORDER BY delay_min DESC",
         "dimensions": [
           {
             "expr": "source.*"
@@ -169,7 +169,7 @@
       "displayName": "trend",
       "config": {
         "version": "1.1",
-        "source": "SELECT\r\n    DATE_TRUNC('hour', event_time) AS hour_bucket,\r\n    transportationType,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles\r\nFROM dbr_dev.live_transit_monitor.gps_positions_silver\r\nWHERE has_trip = true\r\nGROUP BY DATE_TRUNC('hour', event_time), transportationType\r\nHAVING transportationType IS NOT NULL\r\nORDER BY hour_bucket",
+        "source": "SELECT\r\n    DATE_TRUNC('hour', event_time) AS hour_bucket,\r\n    transportationType,\r\n    ROUND(AVG(delay_min), 2) AS avg_delay_min,\r\n    COUNT(DISTINCT vehicleId) AS active_vehicles\r\nFROM live_transit_monitor.gps_positions_silver\r\nWHERE has_trip = true\r\nGROUP BY DATE_TRUNC('hour', event_time), transportationType\r\nHAVING transportationType IS NOT NULL\r\nORDER BY hour_bucket",
         "dimensions": [
           {
             "expr": "source.*"
@@ -211,7 +211,7 @@
       "displayName": "gold_fleet_current",
       "config": {
         "version": "1.1",
-        "source": "dbr_dev.live_transit_monitor.gold_fleet_current",
+        "source": "live_transit_monitor.gold_fleet_current",
         "dimensions": [
           {
             "expr": "source.*"

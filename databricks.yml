@@ -25,6 +25,8 @@ variables:
   silver_schema:
     description: Silver schema.
     default: silver
+  warehouse_id:
+    description: SQL warehouse for dashboards and dashboard_task.
 
 
 # ===========================================================================
@@ -64,7 +66,26 @@ targets:
       catalog: workspace
       bronze_schema: live_transit_monitor
       silver_schema: live_transit_monitor
+      warehouse_id: ba25c68220f8a0ce
     resources:
+
+      dashboards:
+        dq_dashboard:
+          display_name: "Data Quality Dashboard"
+          file_path: ./dashboards/Data Quality Dashboard.lvdash.json
+          warehouse_id: ${var.warehouse_id}
+          dataset_catalog: ${var.catalog}
+        gdansk_live:
+          display_name: "Gdansk Live Transit Monitor"
+          file_path: ./dashboards/Gdansk Live Transit Monitor.lvdash.json
+          warehouse_id: ${var.warehouse_id}
+          dataset_catalog: ${var.catalog}
+        live_map:
+          display_name: "Live Transit Map"
+          file_path: ./dashboards/Live Transit Map.lvdash.json
+          warehouse_id: ${var.warehouse_id}
+          dataset_catalog: ${var.catalog}
+
       jobs:
         transit_gps_stream:
           name: transit-gps-stream-dev
@@ -121,7 +142,26 @@ targets:
                 base_parameters:
                   catalog: ${var.catalog}
                   bronze_schema: ${var.silver_schema}
+            - task_key: refresh_dq_dashboard
+              depends_on:
+                - task_key: gold_data_quality
+              dashboard_task:
+                dashboard_id: ${resources.dashboards.dq_dashboard.id}
+                warehouse_id: ${var.warehouse_id}
 
+            - task_key: refresh_gdansk_live
+              depends_on:
+                - task_key: gold_aggregations
+              dashboard_task:
+                dashboard_id: ${resources.dashboards.gdansk_live.id}
+                warehouse_id: ${var.warehouse_id}
+
+            - task_key: refresh_live_map
+              depends_on:
+                - task_key: gold_aggregations
+              dashboard_task:
+                dashboard_id: ${resources.dashboards.live_map.id}
+                warehouse_id: ${var.warehouse_id}
 
 
   # ===========================================================================
@@ -136,7 +176,26 @@ targets:
       catalog: dbr_dev
       bronze_schema: live_transit_monitor
       silver_schema: live_transit_monitor
+      warehouse_id: 3ed106620db591d9
     resources:
+
+      dashboards:
+        dq_dashboard:
+          display_name: "Data Quality Dashboard"
+          file_path: ./dashboards/Data Quality Dashboard.lvdash.json
+          warehouse_id: ${var.warehouse_id}
+          dataset_catalog: ${var.catalog}
+        gdansk_live:
+          display_name: "Gdansk Live Transit Monitor"
+          file_path: ./dashboards/Gdansk Live Transit Monitor.lvdash.json
+          warehouse_id: ${var.warehouse_id}
+          dataset_catalog: ${var.catalog}
+        live_map:
+          display_name: "Live Transit Map"
+          file_path: ./dashboards/Live Transit Map.lvdash.json
+          warehouse_id: ${var.warehouse_id}
+          dataset_catalog: ${var.catalog}    
+
       jobs:
         transit_gps_stream:
           name: transit-gps-stream-prod
@@ -200,4 +259,23 @@ targets:
                 base_parameters:
                   catalog: ${var.catalog}
                   bronze_schema: ${var.silver_schema}
+            - task_key: refresh_dq_dashboard
+              depends_on:
+                - task_key: gold_data_quality
+              dashboard_task:
+                dashboard_id: ${resources.dashboards.dq_dashboard.id}
+                warehouse_id: ${var.warehouse_id}
 
+            - task_key: refresh_gdansk_live
+              depends_on:
+                - task_key: gold_aggregations
+              dashboard_task:
+                dashboard_id: ${resources.dashboards.gdansk_live.id}
+                warehouse_id: ${var.warehouse_id}
+
+            - task_key: refresh_live_map
+              depends_on:
+                - task_key: gold_aggregations
+              dashboard_task:
+                dashboard_id: ${resources.dashboards.live_map.id}
+                warehouse_id: ${var.warehouse_id}
