@@ -112,16 +112,15 @@ targets:
                 notebook_path: ./gold/07_gold_aggregations.ipynb
                 base_parameters:
                   catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}                  
+            - task_key: gold_data_quality
+              depends_on:
+                - task_key: gold_dqx
+              notebook_task:
+                notebook_path: ./gold/08_gold_dqx.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
                   bronze_schema: ${var.silver_schema}
-                  
-           # - task_key: gold_data_quality
-           #   depends_on:
-           #     - task_key: gold_dqx
-           #   notebook_task:
-           #     notebook_path: ./gold/08_gold_dqx.ipynb
-           #     base_parameters:
-           #       catalog: ${var.catalog}
-           #       bronze_schema: ${var.silver_schema}
 
 
 
@@ -193,12 +192,12 @@ targets:
                 base_parameters:
                   catalog: ${var.catalog}
                   bronze_schema: ${var.silver_schema}
-            # - task_key: gold_data_quality
-            #   depends_on:
-            #     - task_key: gold_dqx
-            #   notebook_task:
-            #     notebook_path: ./gold/08_gold_dqx.ipynb
-            #     base_parameters:
-            #       catalog: ${var.catalog}
-            #       bronze_schema: ${var.silver_schema}
+            - task_key: gold_data_quality
+              depends_on:
+                - task_key: gold_dqx
+              notebook_task:
+                notebook_path: ./gold/08_gold_dqx.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
 
