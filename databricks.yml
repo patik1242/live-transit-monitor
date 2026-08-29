@@ -63,21 +63,62 @@ targets:
       silver_schema: live_transit_monitor
     resources:
       jobs:
-        silver_pipeline:
-          name: live-transit-monitor-dev
+        transit_gps_stream:
+          name: transit-gps-stream-dev
           schedule:
             quartz_cron_expression: "0 0 6 * * ?"   # daily 06:00
             timezone_id: Europe/Warsaw
             pause_status: PAUSED
           tasks:
-
-            # --- Bronze: sample data ---
-            - task_key: gps_consumer
+            # BRONZE — dev = seeder
+            - task_key: bronze
               notebook_task:
-                notebook_path: ./02_gps_consumer.ipynb
+                notebook_path: ./bronze_streaming/00_setup_dev_bronze.ipynb
                 base_parameters:
                   catalog: ${var.catalog}
                   bronze_schema: ${var.bronze_schema}
+
+            # SILVER - LDP pipeline
+            - task_key: silver_ldp
+              depends_on:
+                - task_key: bronze
+              pipeline_task:
+                pipeline_id: ${resources.pipelines.transit_silver_ldp.id}
+
+            # # GOLD — dims -> fact -> aggregations
+            - task_key: gold_dimensions
+              depends_on:
+                - task_key: silver_ldp
+              notebook_task:
+                notebook_path: ./gold/05_gold_dimensions.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
+            - task_key: gold_fact
+              depends_on:
+                - task_key: gold_dimensions
+              notebook_task:
+                notebook_path: ./gold/06_gold_fact_vehicle_status.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
+            - task_key: gold_aggregations
+              depends_on:
+                - task_key: gold_fact
+              notebook_task:
+                notebook_path: ./gold/07_gold_aggregations.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
+                  
+           # - task_key: gold_data_quality
+           #   depends_on:
+           #     - task_key: gold_dqx
+           #   notebook_task:
+           #     notebook_path: ./gold/08_gold_dqx.ipynb
+           #     base_parameters:
+           #       catalog: ${var.catalog}
+           #       bronze_schema: ${var.silver_schema}
 
 
 
@@ -95,8 +136,8 @@ targets:
       silver_schema: live_transit_monitor
     resources:
       jobs:
-        silver_pipeline:
-          name: transit-silver-pipeline-prod
+        transit_gps_stream:
+          name: transit-gps-stream-prod
           schedule:
             quartz_cron_expression: "0 0 6 * * ?"   # daily 06:00
             pause_status: PAUSED
@@ -106,7 +147,7 @@ targets:
             # --- Bronze: gps positions ---
             - task_key: gps_consumer
               notebook_task:
-                notebook_path: ./02_gps_consumer.ipynb
+                notebook_path: ./bronze_streaming/02_gps_consumer.ipynb
                 base_parameters:
                   catalog: ${var.catalog}
                   bronze_schema: ${var.bronze_schema}
@@ -116,5 +157,45 @@ targets:
                   starting_offsets: "earliest"
                   storage_account: "dlspl21databricks"
                   eh_namespace: "evhpl24databricks02"
+            
+            # SILVER - LDP pipeline
+            - task_key: silver_ldp
+              depends_on:
+                - task_key: bronze
+              pipeline_task:
+                pipeline_id: ${resources.pipelines.transit_silver_ldp.id}
 
+            # GOLD — dims -> fact -> aggregations
+            - task_key: gold_dimensions
+              depends_on:
+                - task_key: silver_ldp
+              notebook_task:
+                notebook_path: ./gold/05_gold_dimensions.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
+            - task_key: gold_fact
+              depends_on:
+                - task_key: gold_dimensions
+              notebook_task:
+                notebook_path: ./gold/06_gold_fact_vehicle_status.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
+            - task_key: gold_aggregations
+              depends_on:
+                - task_key: gold_fact
+              notebook_task:
+                notebook_path: ./gold/07_gold_aggregations.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
+            # - task_key: gold_data_quality
+            #   depends_on:
+            #     - task_key: gold_dqx
+            #   notebook_task:
+            #     notebook_path: ./gold/08_gold_dqx.ipynb
+            #     base_parameters:
+            #       catalog: ${var.catalog}
+            #       bronze_schema: ${var.silver_schema}
 
