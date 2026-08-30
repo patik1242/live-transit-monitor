@@ -5,7 +5,7 @@
       "displayName": "gold_dq_by_reason",
       "config": {
         "version": "1.1",
-        "source": "workspace.live_transit_monitor.gold_dq_by_reason",
+        "source": "live_transit_monitor.gold_dq_by_reason",
         "dimensions": [
           {
             "expr": "source.*"
@@ -26,7 +26,7 @@
       "displayName": "gold_dq_trend",
       "config": {
         "version": "1.1",
-        "source": "workspace.live_transit_monitor.gold_dq_trend",
+        "source": "live_transit_monitor.gold_dq_trend",
         "dimensions": [
           {
             "expr": "source.*"
@@ -47,7 +47,7 @@
       "displayName": "gold_dq_reasons",
       "config": {
         "version": "1.1",
-        "source": "workspace.live_transit_monitor.gold_dq_reasons",
+        "source": "live_transit_monitor.gold_dq_reasons",
         "dimensions": [
           {
             "expr": "source.*"
@@ -68,7 +68,7 @@
       "displayName": "gold_dq_top_offenders",
       "config": {
         "version": "1.1",
-        "source": "workspace.live_transit_monitor.gold_dq_top_offenders",
+        "source": "live_transit_monitor.gold_dq_top_offenders",
         "dimensions": [
           {
             "expr": "source.*"
@@ -89,7 +89,7 @@
       "displayName": "gold_dq_warnings",
       "config": {
         "version": "1.1",
-        "source": "workspace.live_transit_monitor.gold_dq_warnings",
+        "source": "live_transit_monitor.gold_dq_warnings",
         "dimensions": [
           {
             "expr": "source.*"
@@ -110,7 +110,7 @@
       "displayName": "gold_reconciliation",
       "config": {
         "version": "1.1",
-        "source": "workspace.live_transit_monitor.gold_reconciliation",
+        "source": "live_transit_monitor.gold_reconciliation",
         "dimensions": [
           {
             "expr": "source.*"
@@ -821,12 +821,8 @@
                       "expression": "`error_rate_pct`"
                     },
                     {
-                      "name": "error_readings",
-                      "expression": "`error_readings`"
-                    },
-                    {
-                      "name": "total_readings",
-                      "expression": "`total_readings`"
+                      "name": "warn_rate_pct",
+                      "expression": "`warn_rate_pct`"
                     }
                   ],
                   "disaggregated": true,
@@ -866,10 +862,7 @@
                     "fieldName": "error_rate_pct"
                   },
                   {
-                    "fieldName": "error_readings"
-                  },
-                  {
-                    "fieldName": "total_readings"
+                    "fieldName": "warn_rate_pct"
                   }
                 ],
                 "rowOrder": [
