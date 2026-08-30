@@ -3,9 +3,9 @@ from pyspark.sql import functions as F
 def add_derived_columns(df):
     return (
         df
-        .withColumn("generated",              F.to_timestamp("generated"))
-        .withColumn("lastUpdate",             F.to_timestamp("lastUpdate"))
-        .withColumn("scheduledTripStartTime", F.to_timestamp("scheduledTripStartTime"))
+        .withColumn("generated",              F.try_to_timestamp("generated"))
+        .withColumn("lastUpdate",             F.try_to_timestamp("lastUpdate"))
+        .withColumn("scheduledTripStartTime", F.try_to_timestamp("scheduledTripStartTime"))
         .withColumn("delay_min",   F.round(F.col("delay") / 60.0, 1))
         .withColumn("has_trip",    F.col("tripId").isNotNull())
         .withColumn("delay_bucket",
