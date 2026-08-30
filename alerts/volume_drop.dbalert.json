@@ -1,0 +1,18 @@
+{
+  "evaluation": {
+    "source": {},
+    "comparison_operator": "EQUAL",
+    "threshold": {},
+    "notification": {}
+  },
+  "query_lines": [
+    "-- Alert: incoming GPS event volume has dropped, suggesting the producer stopped.",
+    "",
+    "SELECT",
+    "    COUNT(*)          AS events_last_hour,",
+    "    MAX(ingestion_ts) AS last_event_at",
+    "FROM dbr_dev.live_transit_monitor.gps_data",
+    "WHERE ingestion_ts >= current_timestamp() - INTERVAL 1 HOUR",
+    "HAVING COUNT(*) < 100"
+  ]
+}
