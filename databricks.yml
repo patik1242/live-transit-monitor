@@ -163,6 +163,77 @@ targets:
                 dashboard_id: ${resources.dashboards.live_map.id}
                 warehouse_id: ${var.warehouse_id}
 
+        dimension_refresh:
+          name: dimension-refresh-${bundle.target}
+          schedule:
+            quartz_cron_expression: "0 0 3 * * ?"   # Daily at 03:00 (before main streaming job)
+            timezone_id: Europe/Warsaw
+            pause_status: PAUSED                     # Start paused, enable when ready
+          max_concurrent_runs: 1
+          tasks:
+            # Step 1: Ingest bronze data
+            - task_key: batch_gtfs
+              notebook_task:
+                notebook_path: ./batch_ingestion/batch_gtfs.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.bronze_schema}
+
+            - task_key: batch_vehicles
+              notebook_task:
+                notebook_path: ./batch_ingestion/batch_vehicles.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.bronze_schema}
+
+            # Step 2: Create SCD tables (idempotent DDL)
+            - task_key: create_routes_scd_table
+              depends_on:
+                - task_key: batch_gtfs
+              notebook_task:
+                notebook_path: ./scd2/create_silver_routes_scd.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
+            - task_key: create_vehicles_scd_table
+              depends_on:
+                - task_key: batch_vehicles
+              notebook_task:
+                notebook_path: ./scd2/create_silver_vehicles_scd.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
+            # Step 3: Transform to silver SCD dimensions
+            - task_key: silver_routes_scd
+              depends_on:
+                - task_key: create_routes_scd_table
+              notebook_task:
+                notebook_path: ./scd2/silver_routes_scd.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
+            - task_key: silver_vehicles_scd
+              depends_on:
+                - task_key: create_vehicles_scd_table
+              notebook_task:
+                notebook_path: ./scd2/silver_vehicles_scd.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
+            # Step 4: Refresh gold dimensions (if gold layer uses these SCD tables)
+            - task_key: refresh_gold_dimensions
+              depends_on:
+                - task_key: silver_routes_scd
+                - task_key: silver_vehicles_scd
+              notebook_task:
+                notebook_path: ./gold/05_gold_dimensions.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
 
   # ===========================================================================
   # PROD  —  Azure Databricks, real ENTSO-E API + Azure Event Hub
@@ -279,3 +350,75 @@ targets:
               dashboard_task:
                 dashboard_id: ${resources.dashboards.live_map.id}
                 warehouse_id: ${var.warehouse_id}
+
+        dimension_refresh:
+          name: dimension-refresh-${bundle.target}
+          schedule:
+            quartz_cron_expression: "0 0 3 * * ?"   # Daily at 03:00 (before main streaming job)
+            timezone_id: Europe/Warsaw
+            pause_status: PAUSED                     # Start paused, enable when ready
+          max_concurrent_runs: 1
+          tasks:
+            # Step 1: Ingest bronze data
+            - task_key: batch_gtfs
+              notebook_task:
+                notebook_path: ./batch_ingestion/batch_gtfs.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.bronze_schema}
+
+            - task_key: batch_vehicles
+              notebook_task:
+                notebook_path: ./batch_ingestion/batch_vehicles.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.bronze_schema}
+
+            # Step 2: Create SCD tables (idempotent DDL)
+            - task_key: create_routes_scd_table
+              depends_on:
+                - task_key: batch_gtfs
+              notebook_task:
+                notebook_path: ./scd2/create_silver_routes_scd.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
+            - task_key: create_vehicles_scd_table
+              depends_on:
+                - task_key: batch_vehicles
+              notebook_task:
+                notebook_path: ./scd2/create_silver_vehicles_scd.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
+            # Step 3: Transform to silver SCD dimensions
+            - task_key: silver_routes_scd
+              depends_on:
+                - task_key: create_routes_scd_table
+              notebook_task:
+                notebook_path: ./scd2/silver_routes_scd.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
+            - task_key: silver_vehicles_scd
+              depends_on:
+                - task_key: create_vehicles_scd_table
+              notebook_task:
+                notebook_path: ./scd2/silver_vehicles_scd.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
+            # Step 4: Refresh gold dimensions (if gold layer uses these SCD tables)
+            - task_key: refresh_gold_dimensions
+              depends_on:
+                - task_key: silver_routes_scd
+                - task_key: silver_vehicles_scd
+              notebook_task:
+                notebook_path: ./gold/05_gold_dimensions.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  bronze_schema: ${var.silver_schema}
