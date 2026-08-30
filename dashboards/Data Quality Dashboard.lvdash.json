@@ -1,11 +1,32 @@
 {
   "datasets": [
     {
+      "name": "24e8f98b",
+      "displayName": "gold_dq_top_offenders",
+      "config": {
+        "version": "1.1",
+        "source": "live_transit_monitor.gold_dq_top_offenders",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
       "name": "fe6b89c2",
       "displayName": "gold_dq_by_reason",
       "config": {
         "version": "1.1",
-        "source": "SELECT * FROM live_transit_monitor.gold_dq_by_reason",
+        "source": "live_transit_monitor.gold_dq_by_reason",
         "dimensions": [
           {
             "expr": "source.*"
@@ -26,7 +47,7 @@
       "displayName": "gold_dq_trend",
       "config": {
         "version": "1.1",
-        "source": "SELECT * FROM live_transit_monitor.gold_dq_trend",
+        "source": "live_transit_monitor.gold_dq_trend",
         "dimensions": [
           {
             "expr": "source.*"
@@ -47,28 +68,7 @@
       "displayName": "gold_dq_reasons",
       "config": {
         "version": "1.1",
-        "source": "SELECT * FROM live_transit_monitor.gold_dq_reasons",
-        "dimensions": [
-          {
-            "expr": "source.*"
-          }
-        ],
-        "measures": [
-          {
-            "name": "count",
-            "expr": "COUNT(*)",
-            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
-            "displayName": "Count"
-          }
-        ]
-      }
-    },
-    {
-      "name": "24e8f98b",
-      "displayName": "gold_dq_top_offenders",
-      "config": {
-        "version": "1.1",
-        "source": "SELECT * FROM live_transit_monitor.gold_dq_top_offenders",
+        "source": "live_transit_monitor.gold_dq_reasons",
         "dimensions": [
           {
             "expr": "source.*"
@@ -89,7 +89,7 @@
       "displayName": "gold_dq_warnings",
       "config": {
         "version": "1.1",
-        "source": "SELECT * FROM live_transit_monitor.gold_dq_warnings",
+        "source": "live_transit_monitor.gold_dq_warnings",
         "dimensions": [
           {
             "expr": "source.*"
@@ -110,7 +110,28 @@
       "displayName": "gold_reconciliation",
       "config": {
         "version": "1.1",
-        "source": "SELECT * FROM live_transit_monitor.gold_reconciliation",
+        "source": "live_transit_monitor.gold_reconciliation",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "6f488f13",
+      "displayName": "dim_vehicle",
+      "config": {
+        "version": "1.1",
+        "source": "dbr_dev.live_transit_monitor.dim_vehicle",
         "dimensions": [
           {
             "expr": "source.*"
@@ -828,7 +849,7 @@
                   "disaggregated": true,
                   "orders": [
                     {
-                      "direction": "ASC",
+                      "direction": "DESC",
                       "expression": "`error_rate_pct`"
                     }
                   ]
@@ -853,21 +874,25 @@
               "encodings": {
                 "columns": [
                   {
-                    "fieldName": "vehicleCode"
+                    "fieldName": "vehicleCode",
+                    "displayName": "Vehicle Code"
                   },
                   {
-                    "fieldName": "vehicleId"
+                    "fieldName": "vehicleId",
+                    "displayName": "Vehicle ID"
                   },
                   {
-                    "fieldName": "error_rate_pct"
+                    "fieldName": "error_rate_pct",
+                    "displayName": "Error Rate %"
                   },
                   {
-                    "fieldName": "warn_rate_pct"
+                    "fieldName": "warn_rate_pct",
+                    "displayName": "Warn Rate %"
                   }
                 ],
                 "rowOrder": [
                   {
-                    "by": "column",
+                    "by": "column-reversed",
                     "field": {
                       "index": 2
                     }

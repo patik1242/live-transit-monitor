@@ -149,16 +149,16 @@
                       "expression": "`gold_fleet_current`.`lon`"
                     },
                     {
-                      "name": "gold_fleet_current__routeShortName",
-                      "expression": "`gold_fleet_current`.`routeShortName`"
+                      "name": "gold_fleet_current__route_short_name",
+                      "expression": "`gold_fleet_current`.`route_short_name`"
+                    },
+                    {
+                      "name": "gold_fleet_current__transportationType",
+                      "expression": "`gold_fleet_current`.`transportationType`"
                     },
                     {
                       "name": "gold_fleet_current__delay_min",
                       "expression": "`gold_fleet_current`.`delay_min`"
-                    },
-                    {
-                      "name": "gold_fleet_current__speed",
-                      "expression": "`gold_fleet_current`.`speed`"
                     }
                   ],
                   "disaggregated": true
@@ -169,7 +169,7 @@
               "frame": {
                 "showTitle": true,
                 "title": {
-                  "value": "Live Transit Map - Gdańsk Tristar",
+                  "value": "<span style=\"font-size: 18px;\">Live Transit Map - Gdańsk Tristar</span>",
                   "fields": []
                 }
               },
@@ -190,7 +190,7 @@
                 },
                 "color": {
                   "fieldName": "gold_fleet_current__delay_bucket",
-                  "displayName": "Delay Bucket",
+                  "displayName": "Delay bucket",
                   "scale": {
                     "type": "categorical",
                     "mappings": [
@@ -206,16 +206,16 @@
                 },
                 "extra": [
                   {
-                    "fieldName": "gold_fleet_current__routeShortName",
-                    "displayName": "Route Name"
+                    "fieldName": "gold_fleet_current__route_short_name",
+                    "displayName": "Route name"
+                  },
+                  {
+                    "fieldName": "gold_fleet_current__transportationType",
+                    "displayName": "Transportation type"
                   },
                   {
                     "fieldName": "gold_fleet_current__delay_min",
-                    "displayName": "Delay in Minutes"
-                  },
-                  {
-                    "fieldName": "gold_fleet_current__speed",
-                    "displayName": "Speed"
+                    "displayName": "Delay in minutes"
                   }
                 ]
               },
@@ -240,37 +240,27 @@
                 "query": {
                   "fields": [
                     {
-                      "name": "gold_fleet_current__routeShortName",
-                      "expression": "`gold_fleet_current`.`routeShortName`"
+                      "name": "gold_fleet_current__route_short_name",
+                      "expression": "`gold_fleet_current`.`route_short_name`"
                     },
                     {
                       "name": "gold_fleet_current__headsign",
                       "expression": "`gold_fleet_current`.`headsign`"
                     },
                     {
+                      "name": "gold_fleet_current__vehicleId",
+                      "expression": "`gold_fleet_current`.`vehicleId`"
+                    },
+                    {
+                      "name": "gold_fleet_current__delay_bucket",
+                      "expression": "`gold_fleet_current`.`delay_bucket`"
+                    },
+                    {
                       "name": "gold_fleet_current__transportationType",
                       "expression": "`gold_fleet_current`.`transportationType`"
-                    },
-                    {
-                      "name": "gold_fleet_current__model",
-                      "expression": "`gold_fleet_current`.`model`"
-                    },
-                    {
-                      "name": "gold_fleet_current__delay_min",
-                      "expression": "`gold_fleet_current`.`delay_min`"
-                    },
-                    {
-                      "name": "gold_fleet_current__speed",
-                      "expression": "`gold_fleet_current`.`speed`"
                     }
                   ],
-                  "disaggregated": true,
-                  "orders": [
-                    {
-                      "direction": "DESC",
-                      "expression": "`gold_fleet_current`.`delay_min`"
-                    }
-                  ]
+                  "disaggregated": true
                 }
               }
             ],
@@ -278,7 +268,7 @@
               "frame": {
                 "showTitle": true,
                 "title": {
-                  "value": "Vehicle View",
+                  "value": "<span style=\"font-size: 18px;\">Vehicle View</span>",
                   "fields": []
                 }
               },
@@ -287,7 +277,7 @@
               "encodings": {
                 "columns": [
                   {
-                    "fieldName": "gold_fleet_current__routeShortName",
+                    "fieldName": "gold_fleet_current__route_short_name",
                     "displayName": "Route Name"
                   },
                   {
@@ -295,28 +285,16 @@
                     "displayName": "Headsign"
                   },
                   {
+                    "fieldName": "gold_fleet_current__vehicleId",
+                    "displayName": "Vehicle ID"
+                  },
+                  {
+                    "fieldName": "gold_fleet_current__delay_bucket",
+                    "displayName": "Delay Buket"
+                  },
+                  {
                     "fieldName": "gold_fleet_current__transportationType",
                     "displayName": "Transportation Type"
-                  },
-                  {
-                    "fieldName": "gold_fleet_current__model",
-                    "displayName": "Vehicle Model"
-                  },
-                  {
-                    "fieldName": "gold_fleet_current__delay_min",
-                    "displayName": "Delay in minutes"
-                  },
-                  {
-                    "fieldName": "gold_fleet_current__speed",
-                    "displayName": "Speed"
-                  }
-                ],
-                "rowOrder": [
-                  {
-                    "by": "column-reversed",
-                    "field": {
-                      "index": 4
-                    }
                   }
                 ]
               },
@@ -361,7 +339,15 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "max(gold_fleet_current__event_time_local)"
+                  "fieldName": "max(gold_fleet_current__event_time_local)",
+                  "style": {
+                    "fontWeight": 600,
+                    "fontStyle": "normal",
+                    "fontColor": {
+                      "themeColorType": "visualizationColors",
+                      "position": 2
+                    }
+                  }
                 }
               },
               "data": {
