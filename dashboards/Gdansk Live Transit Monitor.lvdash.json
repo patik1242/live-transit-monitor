@@ -1929,16 +1929,12 @@
                 "query": {
                   "fields": [
                     {
-                      "name": "Untitled_dataset_4__avg_delay_min",
-                      "expression": "`Untitled_dataset_4`.`avg_delay_min`"
+                      "name": "Untitled_dataset_4__on_time_pct",
+                      "expression": "`Untitled_dataset_4`.`on_time_pct`"
                     },
                     {
                       "name": "Untitled_dataset_4__transportationType",
                       "expression": "`Untitled_dataset_4`.`transportationType`"
-                    },
-                    {
-                      "name": "Untitled_dataset_4__on_time_pct",
-                      "expression": "`Untitled_dataset_4`.`on_time_pct`"
                     },
                     {
                       "name": "Untitled_dataset_4__route_short_name",
@@ -1991,8 +1987,8 @@
                   }
                 },
                 "color": {
-                  "fieldName": "Untitled_dataset_4__avg_delay_min",
-                  "displayName": "Avg Delay",
+                  "fieldName": "Untitled_dataset_4__on_time_pct",
+                  "displayName": "On time [%]",
                   "scale": {
                     "type": "quantitative",
                     "domain": {
@@ -2063,7 +2059,10 @@
                   "fieldName": "Untitled_dataset_5__route_short_name",
                   "displayName": "Route",
                   "scale": {
-                    "type": "categorical"
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
                   }
                 },
                 "y": {
@@ -2150,7 +2149,10 @@
                   "fieldName": "Untitled_dataset_6__feature",
                   "displayName": "Feature",
                   "scale": {
-                    "type": "categorical"
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
                   }
                 },
                 "y": {
