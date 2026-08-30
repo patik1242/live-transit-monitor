@@ -41,6 +41,48 @@
           }
         ]
       }
+    },
+    {
+      "name": "511addd1",
+      "displayName": "dim_vehicle",
+      "config": {
+        "version": "1.1",
+        "source": "dbr_dev.live_transit_monitor.dim_vehicle",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "8d740148",
+      "displayName": "dim_route",
+      "config": {
+        "version": "1.1",
+        "source": "dbr_dev.live_transit_monitor.dim_route",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
     }
   ],
   "relationshipGraphs": [
@@ -53,6 +95,30 @@
         {
           "name": "gold_live_kpi",
           "datasetName": "365af487"
+        },
+        {
+          "name": "dim_vehicle",
+          "datasetName": "511addd1"
+        },
+        {
+          "name": "dim_route",
+          "datasetName": "8d740148"
+        }
+      ],
+      "relationships": [
+        {
+          "name": "dim_vehicle_gold_fleet_current",
+          "from": "dim_vehicle",
+          "to": "gold_fleet_current",
+          "on": "`dim_vehicle`.`vehicleId` = `gold_fleet_current`.`vehicleId`",
+          "cardinality": "CARDINALITY_MANY_TO_ONE"
+        },
+        {
+          "name": "dim_route_gold_fleet_current",
+          "from": "dim_route",
+          "to": "gold_fleet_current",
+          "on": "`dim_route`.`routeShortName` = `gold_fleet_current`.`routeShortName`",
+          "cardinality": "CARDINALITY_MANY_TO_ONE"
         }
       ]
     }
@@ -209,11 +275,14 @@
               }
             ],
             "spec": {
-              "version": 2,
               "frame": {
                 "showTitle": true,
-                "title": "Vehicle View"
+                "title": {
+                  "value": "Vehicle View",
+                  "fields": []
+                }
               },
+              "version": 2,
               "widgetType": "table",
               "encodings": {
                 "columns": [
