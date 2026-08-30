@@ -508,11 +508,11 @@
                 "query": {
                   "fields": [
                     {
-                      "name": "gold_live_kpi__active_vehicles",
-                      "expression": "`gold_live_kpi`.`active_vehicles`"
+                      "name": "sum(gold_live_kpi__active_vehicles)",
+                      "expression": "SUM(`gold_live_kpi`.`active_vehicles`)"
                     }
                   ],
-                  "disaggregated": true
+                  "disaggregated": false
                 }
               }
             ],
@@ -528,13 +528,7 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "gold_live_kpi__active_vehicles",
-                  "style": {
-                    "fontColor": {
-                      "themeColorType": "visualizationColors",
-                      "position": 1
-                    }
-                  }
+                  "fieldName": "sum(gold_live_kpi__active_vehicles)"
                 }
               },
               "data": {
