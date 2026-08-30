@@ -2074,7 +2074,7 @@
                 },
                 "color": {
                   "fieldName": "Untitled_dataset_5__delayed_pct",
-                  "displayName": "Avg Speed",
+                  "displayName": "Delayed [%]",
                   "scale": {
                     "type": "quantitative",
                     "colorRamp": {
