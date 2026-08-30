@@ -58,7 +58,7 @@ checked directly.
 | SCD Type 2 dimensions | `scd2/` | historized routes and vehicles with validity ranges |
 | Gold star schema | `gold/05_gold_dimensions.ipynb`, `gold/06_gold_fact_vehicle_status.ipynb` | one fact table plus four dimensions |
 | Serving aggregations | `gold/07_gold_aggregations.ipynb` | live KPI, fleet, route, delay and destination summaries |
-| Data quality (DQX) | `silver/ldp_pipeline.py`, `gold/08_gold_dqx.ipynb` | in-pipeline checks, valid vs quarantine split, DQ tables |
+| Data quality (DQX) | `silver/ldp_pipeline.py`, `gold/08_gold_dqx.ipynb`, Databricks SQL alert | in-pipeline checks, valid vs quarantine split, DQ tables, quarantine-rate alert |
 | Unit tests | `silver/tests/` | pytest over the pure silver transformation |
 | Orchestration (jobs) | `databricks.yml` | streaming job and batch dimension-refresh job |
 | CI/CD readiness | `databricks.yml`, notebook widgets | DAB dev/prod targets, parameterised catalog and schema |
@@ -145,12 +145,20 @@ tables (`gold_dq_reasons`, `gold_dq_by_reason`, `gold_dq_top_offenders`, `gold_d
 
 ## Data quality
 
-Quality is enforced in two places. Inside the silver pipeline, DQX splits the stream into a valid
+Quality is enforced at three points. Inside the silver pipeline, DQX splits the stream into a valid
 table and a quarantine table, so bad rows are kept and inspectable rather than silently dropped. In
 gold, `08_gold_dqx` summarises those rows into scorecards (failures by reason, top offenders, a trend
 over time, warnings) and runs a reconciliation between bronze, silver and gold to catch silent losses
 between layers. The `Data Quality Dashboard` reads these tables, and the streaming job refreshes it on
 every run.
+
+On top of that, a **Databricks SQL alert** watches the quarantine rate and notifies by email when it
+crosses a threshold. The query measures the share of rows sent to quarantine over the last day
+(`quarantine_pct`), with a minimum row count so a quiet window does not raise a false alarm. In normal
+operation the rate sits near 0.5 percent, so the alert is set to fire at 2 percent, which is well above
+the baseline but still catches a real drop in feed quality.
+
+![Data Quality alert](./Data%20Quality%20Alert.png)
 
 ---
 
