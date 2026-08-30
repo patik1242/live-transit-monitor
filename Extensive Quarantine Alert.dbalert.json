@@ -1,0 +1,27 @@
+{
+  "evaluation": {
+    "source": {
+      "name": "quarantine_pct",
+      "display": "quarantine_pct",
+      "aggregation": "AGGREGATION_UNSPECIFIED"
+    },
+    "comparison_operator": "GREATER_THAN_OR_EQUAL",
+    "threshold": {
+      "value": {
+        "double_value": 2.0
+      }
+    },
+    "notification": {}
+  },
+  "schedule": {
+    "quartz_cron_schedule": "16 0 9 * * ?",
+    "timezone_id": "Europe/Sarajevo"
+  },
+  "query_lines": [
+    "SELECT",
+    "  ROUND(100.0 * SUM(CASE WHEN _errors IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*), 2) AS quarantine_pct,",
+    "  COUNT(*) AS total_rows",
+    "FROM dbr_dev.live_transit_monitor.gps_positions_silver_checked",
+    "WHERE ingestion_ts >= current_timestamp() - INTERVAL 1 DAY"
+  ]
+}

@@ -290,7 +290,7 @@
                   },
                   {
                     "fieldName": "gold_fleet_current__delay_bucket",
-                    "displayName": "Delay Buket"
+                    "displayName": "Delay Bucket"
                   },
                   {
                     "fieldName": "gold_fleet_current__transportationType",
