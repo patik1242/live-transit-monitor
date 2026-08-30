@@ -821,12 +821,8 @@
                       "expression": "`error_rate_pct`"
                     },
                     {
-                      "name": "error_readings",
-                      "expression": "`error_readings`"
-                    },
-                    {
-                      "name": "total_readings",
-                      "expression": "`total_readings`"
+                      "name": "warn_rate_pct",
+                      "expression": "`warn_rate_pct`"
                     }
                   ],
                   "disaggregated": true,
@@ -866,10 +862,7 @@
                     "fieldName": "error_rate_pct"
                   },
                   {
-                    "fieldName": "error_readings"
-                  },
-                  {
-                    "fieldName": "total_readings"
+                    "fieldName": "warn_rate_pct"
                   }
                 ],
                 "rowOrder": [
