@@ -8,6 +8,7 @@ from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 from databricks.labs.dqx.engine import DQEngine
 from databricks.sdk import WorkspaceClient
+from silver_transformation import add_derived_columns
 
 dq = DQEngine(WorkspaceClient())
 
@@ -39,22 +40,7 @@ CHECKS = [
 
 def _enrich(df):
     """Derived columns shared by all downstream tables (pure -> testable later)."""
-    return (df
-        .withColumn("generated",              F.to_timestamp("generated"))
-        .withColumn("lastUpdate",             F.to_timestamp("lastUpdate"))
-        .withColumn("scheduledTripStartTime", F.to_timestamp("scheduledTripStartTime"))
-        .withColumn("delay_min",   F.round(F.col("delay") / 60.0, 1))
-        .withColumn("has_trip",    F.col("tripId").isNotNull())
-        .withColumn("delay_bucket",
-            F.when(F.col("delay") < -60, "early")
-             .when(F.col("delay") <= 120, "on_time")
-             .otherwise("delayed"))
-        .withColumn("is_delayed",  F.col("delay") > 120)
-        .withColumn("is_stopped",  F.col("speed") == 0)
-        .withColumn("is_moving",   F.col("speed") > 0)
-        .withColumn("gps_ok",      F.col("gpsQuality") > 0)
-        .withColumn("event_time_local",
-            F.from_utc_timestamp("event_time", "Europe/Warsaw")))
+    return (add_derived_columns(spark.readStream.table(BRONZE_GPS)))
 
 
 # 1) CHECKED — enrich, then apply DQX (adds _errors/_warnings, keeps ALL rows)
