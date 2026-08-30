@@ -61,7 +61,7 @@ BUCKET_LABELS = {"early": "Early", "on_time": "On time", "delayed": "Delayed"}
 def load_fleet() -> pd.DataFrame:
     """Fetch the current fleet snapshot from gold_fleet_current."""
     query = f"""
-        SELECT vehicleCode, routeShortName, headsign,
+        SELECT vehicleCode, route_short_name, headsign,
                lat, lon, delay_min, delay_bucket, transportationType,
                event_time_local
         FROM {TABLE}
@@ -77,10 +77,10 @@ def load_fleet() -> pd.DataFrame:
 
 
 def build_map(df: pd.DataFrame) -> folium.Map:
-    m = folium.Map(location=GDANSK_CENTER, zoom_start=12, tiles="CartoDB positron")
+    m = folium.Map(location=GDANSK_CENTER, zoom_start=12, tiles="OpenStreetMap")
     for _, v in df.iterrows():
         color = BUCKET_COLORS.get(v.delay_bucket, "gray")
-        popup = (f"<b>{v.routeShortName}</b> → {v.headsign}<br>"
+        popup = (f"<b>{v.route_short_name}</b> → {v.headsign}<br>"
                  f"{v.transportationType or ''} · {v.vehicleCode}<br>"
                  f"Delay: {v.delay_min} min")
         folium.CircleMarker(
