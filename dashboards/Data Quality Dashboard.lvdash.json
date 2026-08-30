@@ -5,7 +5,7 @@
       "displayName": "gold_dq_by_reason",
       "config": {
         "version": "1.1",
-        "source": "live_transit_monitor.gold_dq_by_reason",
+        "source": "SELECT * FROM live_transit_monitor.gold_dq_by_reason",
         "dimensions": [
           {
             "expr": "source.*"
@@ -26,7 +26,7 @@
       "displayName": "gold_dq_trend",
       "config": {
         "version": "1.1",
-        "source": "live_transit_monitor.gold_dq_trend",
+        "source": "SELECT * FROM live_transit_monitor.gold_dq_trend",
         "dimensions": [
           {
             "expr": "source.*"
@@ -47,7 +47,7 @@
       "displayName": "gold_dq_reasons",
       "config": {
         "version": "1.1",
-        "source": "live_transit_monitor.gold_dq_reasons",
+        "source": "SELECT * FROM live_transit_monitor.gold_dq_reasons",
         "dimensions": [
           {
             "expr": "source.*"
@@ -68,7 +68,7 @@
       "displayName": "gold_dq_top_offenders",
       "config": {
         "version": "1.1",
-        "source": "live_transit_monitor.gold_dq_top_offenders",
+        "source": "SELECT * FROM live_transit_monitor.gold_dq_top_offenders",
         "dimensions": [
           {
             "expr": "source.*"
@@ -89,7 +89,7 @@
       "displayName": "gold_dq_warnings",
       "config": {
         "version": "1.1",
-        "source": "live_transit_monitor.gold_dq_warnings",
+        "source": "SELECT * FROM live_transit_monitor.gold_dq_warnings",
         "dimensions": [
           {
             "expr": "source.*"
@@ -110,7 +110,7 @@
       "displayName": "gold_reconciliation",
       "config": {
         "version": "1.1",
-        "source": "live_transit_monitor.gold_reconciliation",
+        "source": "SELECT * FROM live_transit_monitor.gold_reconciliation",
         "dimensions": [
           {
             "expr": "source.*"

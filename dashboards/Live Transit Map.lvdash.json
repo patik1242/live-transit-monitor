@@ -5,7 +5,7 @@
       "displayName": "gold_fleet_current",
       "config": {
         "version": "1.1",
-        "source": "live_transit_monitor.gold_fleet_current",
+        "source": "SELECT * FROM live_transit_monitor.gold_fleet_current",
         "dimensions": [
           {
             "expr": "source.*"
@@ -26,7 +26,7 @@
       "displayName": "gold_live_kpi",
       "config": {
         "version": "1.1",
-        "source": "live_transit_monitor.gold_live_kpi",
+        "source": "SELECT * FROM live_transit_monitor.gold_live_kpi",
         "dimensions": [
           {
             "expr": "source.*"
