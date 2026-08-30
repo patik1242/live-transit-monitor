@@ -9,7 +9,8 @@ def add_derived_columns(df):
         .withColumn("delay_min",   F.round(F.col("delay") / 60.0, 1))
         .withColumn("has_trip",    F.col("tripId").isNotNull())
         .withColumn("delay_bucket",
-            F.when(F.col("delay") < -60, "early")
+            F.when(F.col("delay").isNull(), F.lit(None).cast("string"))        
+             .when(F.col("delay") < -60, "early")
              .when(F.col("delay") <= 120, "on_time")
              .otherwise("delayed"))
         .withColumn("is_delayed",  F.col("delay") > 120)

@@ -1,56 +1,74 @@
 # ldp_pipeline.py
 # Lakeflow Spark Declarative Pipeline — Transit GPS: bronze -> silver.
-# Refines raw GPS bronze into a clean, deduplicated silver table, with
-# data-quality expectations. Ingestion stays OUTSIDE this file (dev: seeded
-# bronze; prod: Event Hub consumer). Gold/dnalytics/dashboards also stay outside.
+# Enriches raw GPS bronze, applies DQX data-quality checks, splits into a
+# deduplicated silver table and a quarantine table.
+# Ingestion stays OUTSIDE this file. Gold/analytics/dashboards stay outside.
 
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
+from databricks.labs.dqx.engine import DQEngine
+from databricks.sdk import WorkspaceClient
 from silver_transformation import add_derived_columns
 
+dq = DQEngine(WorkspaceClient())
+
 # --- Parameters: from the pipeline configuration ---
-# dev  -> catalog=workspace, bronze_schema=live_transit_monitor
-# prod -> catalog=dbr_dev,   bronze_schema=live_transit_monitor
 CATALOG       = spark.conf.get("catalog")
 BRONZE_SCHEMA = spark.conf.get("bronze_schema")
+BRONZE_GPS    = f"{CATALOG}.{BRONZE_SCHEMA}.gps_data"
 
-BRONZE_GPS = f"{CATALOG}.{BRONZE_SCHEMA}.gps_data"
-
-# Single source of truth for pipeline table names.
 TABLES = {
-    "silver_clean": "gps_positions_silver_clean",
-    "silver":       "gps_positions_silver",
+    "checked":    "gps_positions_silver_checked",
+    "valid":      "gps_positions_silver_valid",
+    "quarantine": "gps_positions_quarantine",
+    "silver":     "gps_positions_silver",
 }
 
-# ===================================================================
-# SILVER (clean) — expectations + derived columns
-#   expect_all          -> keep the row, only COUNT the failure (warn)
-#   expect_all_or_drop  -> DROP the failing row
-#   expect_all_or_fail  -> STOP the pipeline
-# ===================================================================
-@dp.table(name=TABLES["silver_clean"])
-@dp.expect_all_or_drop({
-    "coords_present": "lat IS NOT NULL AND lon IS NOT NULL",
-    "in_gdansk_bbox": "lat BETWEEN 54.2 AND 54.6 AND lon BETWEEN 18.3 AND 19.0",
-})
-@dp.expect_all({                       # warn only — does not drop
-    "gps_quality_ok": "gpsQuality > 0",
-})
-@dp.expect_all_or_fail({               # a missing business key stops the run
-    "vehicle_present": "vehicleId IS NOT NULL",
-})
-def silver_clean():
+# --- DQX quality checks (metadata form) ---
+CHECKS = [
+    {"criticality": "error", "check": {"function": "is_not_null", "arguments": {"column": "vehicleId"}}},
+    {"criticality": "error", "check": {"function": "is_not_null", "arguments": {"column": "lat"}}},
+    {"criticality": "error", "check": {"function": "is_not_null", "arguments": {"column": "lon"}}},
+    {"criticality": "error", "check": {"function": "is_in_range",
+        "arguments": {"column": "lat", "min_limit": 54.2, "max_limit": 54.6}}},
+    {"criticality": "error", "check": {"function": "is_in_range",
+        "arguments": {"column": "lon", "min_limit": 18.3, "max_limit": 19.0}}},
+    {"criticality": "warn", "check": {"function": "is_not_less_than",
+        "arguments": {"column": "gpsQuality", "limit": 1}}},
+]
+
+
+def _enrich(df):
+    """Derived columns shared by all downstream tables (pure -> testable later)."""
     return (add_derived_columns(spark.readStream.table(BRONZE_GPS)))
 
-# ===================================================================
-# SILVER (final) — idempotent dedup via CDC.
-# Replaces dropDuplicates(["vehicleId", "generated"]). The engine performs
-# the upsert, so re-running the pipeline never creates duplicate rows.
-# ===================================================================
+
+# 1) CHECKED — enrich, then apply DQX (adds _errors/_warnings, keeps ALL rows)
+@dp.table(name=TABLES["checked"])
+def checked():
+    df = _enrich(spark.readStream.table(BRONZE_GPS))
+    return dq.apply_checks_by_metadata(df, CHECKS)
+
+
+# 2) VALID — good rows only, drop DQX helper cols, feed CDC
+@dp.table(name=TABLES["valid"])
+def valid():
+    return (spark.readStream.table(TABLES["checked"])
+            .filter("_errors IS NULL")
+            .drop("_errors", "_warnings"))
+
+
+# 3) QUARANTINE — bad rows, keep the DQX error detail
+@dp.table(name=TABLES["quarantine"])
+def quarantine():
+    return spark.readStream.table(TABLES["checked"]).filter("_errors IS NOT NULL")
+
+
+# 4) SILVER (final) — idempotent CDC dedup on the valid stream
 dp.create_streaming_table(name=TABLES["silver"])
 dp.create_auto_cdc_flow(
     target      = TABLES["silver"],
-    source      = TABLES["silver_clean"],
-    keys        = ["vehicleId", "generated"], # composite
+    source      = TABLES["valid"],
+    keys        = ["vehicleId", "generated"],
     sequence_by = F.col("event_time"),
 )
