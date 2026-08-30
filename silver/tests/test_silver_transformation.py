@@ -180,7 +180,7 @@ def test_empty_input_keeps_schema_and_has_no_rows(spark_session):
 def test_typical_sample_file_can_be_enriched(spark_session):
     sample_path = Path(__file__).parents[2] / "sample_data" / "gps_20260729_173022.json"
     sample = spark_session.read.json(str(sample_path)).withColumn(
-        "event_time", F.lit(datetime(2026, 7, 29, 15, 30, 3)).cast("timestamp")
+        "event_time", F.lit(datetime(2026, 7, 29, 15, 30, 3)).try_cast("timestamp")
     )
 
     result = add_derived_columns(sample)
