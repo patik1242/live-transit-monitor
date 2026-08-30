@@ -235,6 +235,24 @@ targets:
                   catalog: ${var.catalog}
                   bronze_schema: ${var.silver_schema}
 
+            # Step 5: Reconciliation between medallion layers (feeds reconciliation_gap alert)
+            - task_key: create_reconciliation_results
+              depends_on:
+                - task_key: refresh_gold_dimensions
+              notebook_task:
+                notebook_path: ./scd2/create_reconciliation_results.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+            - task_key: reconciliation_checks
+              depends_on:
+                - task_key: create_reconciliation_results
+              notebook_task:
+                notebook_path: ./scd2/reconciliation_checks.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+
   # ===========================================================================
   # PROD  —  Azure Databricks, real ENTSO-E API + Azure Event Hub
   # ===========================================================================
@@ -422,3 +440,21 @@ targets:
                 base_parameters:
                   catalog: ${var.catalog}
                   bronze_schema: ${var.silver_schema}
+
+            # Step 5: Reconciliation between medallion layers (feeds reconciliation_gap alert)
+            - task_key: create_reconciliation_results
+              depends_on:
+                - task_key: refresh_gold_dimensions
+              notebook_task:
+                notebook_path: ./scd2/create_reconciliation_results.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
+            - task_key: reconciliation_checks
+              depends_on:
+                - task_key: create_reconciliation_results
+              notebook_task:
+                notebook_path: ./scd2/reconciliation_checks.ipynb
+                base_parameters:
+                  catalog: ${var.catalog}
+                  schema: ${var.silver_schema}
