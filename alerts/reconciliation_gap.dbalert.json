@@ -1,0 +1,33 @@
+{
+  "evaluation": {
+    "source": {},
+    "comparison_operator": "EQUAL",
+    "threshold": {},
+    "notification": {}
+  },
+  "query_lines": [
+    "-- Alert: reconciliation between medallion layers shows an unexpected gap.",
+    "",
+    "SELECT",
+    "    check_name,",
+    "    source_table,",
+    "    target_table,",
+    "    missing_in_target,",
+    "    missing_in_source,",
+    "    checked_at",
+    "FROM dbr_dev.live_transit_monitor.reconciliation_results",
+    "WHERE checked_at = (",
+    "        SELECT MAX(checked_at)",
+    "        FROM dbr_dev.live_transit_monitor.reconciliation_results",
+    "      )",
+    "  AND (",
+    "        -- bronze -> silver should lose nothing beyond quarantined records",
+    "        -- a larger gap means the load is dropping data",
+    "        (check_name LIKE '%bronze -> silver%' AND missing_in_target > 5)",
+    "",
+    "        -- reference vs stream - a jump means the registry went stale",
+    "        -- or unexpected records entered the stream",
+    "     OR (check_name LIKE '%reference vs stream%' AND missing_in_source > 100)",
+    "      )"
+  ]
+}
