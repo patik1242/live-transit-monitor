@@ -371,8 +371,8 @@
                 "query": {
                   "fields": [
                     {
-                      "name": "sum(gold_live_kpi__delayed_vehicles)",
-                      "expression": "SUM(`gold_live_kpi`.`delayed_vehicles`)"
+                      "name": "avg(gold_live_kpi__delayed_vehicles)",
+                      "expression": "AVG(`gold_live_kpi`.`delayed_vehicles`)"
                     }
                   ],
                   "disaggregated": false
@@ -391,7 +391,7 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(gold_live_kpi__delayed_vehicles)",
+                  "fieldName": "avg(gold_live_kpi__delayed_vehicles)",
                   "style": {
                     "fontWeight": 700,
                     "fontStyle": "normal",
@@ -556,11 +556,14 @@
               }
             ],
             "spec": {
-              "version": 2,
               "frame": {
                 "showTitle": true,
-                "title": "Active Vehicles"
+                "title": {
+                  "value": "Active Vehicles",
+                  "fields": []
+                }
               },
+              "version": 2,
               "widgetType": "counter",
               "encodings": {
                 "value": {
