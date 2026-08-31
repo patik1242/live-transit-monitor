@@ -205,8 +205,10 @@ the live and map dashboards after the aggregations. The consumer drains with
 
 GTFS and the roster are ingested (`batch_gtfs`, `batch_vehicles`), the SCD tables are created if
 missing, the SCD loads run (`silver_routes_scd`, `silver_vehicles_scd`), and gold dimensions are
-refreshed. This job is separate from the streaming job on purpose, so reference data is not re-loaded
-on every streaming cycle.
+refreshed. It then runs the cross-layer reconciliation: `create_reconciliation_results` provisions the
+history table and `reconciliation_checks` compares business keys between the layers, appending the
+counts that the reconciliation alert reads. This job is separate from the streaming job on purpose, so
+reference data is not re-loaded on every streaming cycle.
 
 ### Parameters
 Environment-specific values are exposed as bundle variables and notebook widgets rather than
